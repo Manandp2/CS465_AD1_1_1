@@ -1,7 +1,10 @@
 import { useState, useEffect } from 'react';
+import { gapi } from 'gapi-script';
 import './App.css';
 
 // Define your constants here
+const google = window.google;
+
 const CLIENT_ID = "614127097265-pdklurnj0e83fnd2m6s797gq67c1u4aq.apps.googleusercontent.com";
 const API_KEY = "AIzaSyDZYd2i-rX4oN_7i2AeSwGeJ0Uq2jo_Rng";
 const DISCOVERY_DOC = "https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest";
@@ -157,6 +160,18 @@ function App() {
       return;
     }
     CalenDoneID = response.result.id;
+  };
+
+  const exampleEvent = {
+    summary: "sleep eternally",
+    start: {
+      dateTime: "2024-11-19T09:00:00-02:00",
+      timeZone: "America/Chicago",
+    },
+    end: {
+      dateTime: "2024-11-19T17:00:00-02:00",
+      timeZone: "America/Chicago",
+    }
   };
 
   const createNewEvent = async () => {
