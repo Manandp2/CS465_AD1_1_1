@@ -7,6 +7,7 @@
     "@emotion/styled": "^11.13.5",
     "@material-symbols/svg-400": "^0.27.1",
     "@material/web": "^2.2.0",
+    "@mui/icons-material": "^6.1.9",
     "@mui/material": "^6.1.9",
     "@testing-library/jest-dom": "^5.17.0",
     "@testing-library/react": "^13.4.0",
