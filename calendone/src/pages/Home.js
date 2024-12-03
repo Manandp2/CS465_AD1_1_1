@@ -4,11 +4,11 @@ import { useState } from "react";
 import PropTypes from "prop-types";
 import Box from "@mui/material/Box";
 
-import Topbar from "../../components/Topbar";
-import Bottombar from "../../components/Bottombar";
+import Topbar from "../components/Topbar";
+import Bottombar from "../components/Bottombar";
 import Tabs from "@mui/material/Tabs";
 import Tab from "@mui/material/Tab";
-import TaskList from "../../components/TaskList";
+import TaskList from "../components/TaskList";
 
 import Accordion from "@mui/material/Accordion";
 import AccordionSummary from "@mui/material/AccordionSummary";

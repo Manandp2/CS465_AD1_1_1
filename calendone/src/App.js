@@ -1,7 +1,7 @@
 // import "./App.css";
 import { useState } from "react";
-import Home from "./pages/home/Home";
-// import Settings from './pages/settings/Settings';
+import Home from "./pages/Home";
+// import Settings from './pages/Settings';
 
 function App() {
   const [curPage, setCurPage] = useState("Home");
