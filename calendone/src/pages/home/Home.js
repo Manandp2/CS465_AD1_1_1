@@ -64,8 +64,7 @@ export default function Home() {
   // for (let i = 0; i < 20; i++) {
   //   completeList.push("Completed Task " + i);
   // }
-
-  const [tab, setTab] = React.useState(0);
+  // const [tab, setTab] = React.useState(0);
 
   return (
     <div className="pagebody">
