@@ -1,16 +1,15 @@
 import "./Home.css";
 import React from "react";
 import { useState } from "react";
-import PropTypes from "prop-types";
-import Box from "@mui/material/Box";
 
 import Topbar from "../../components/Topbar";
-import Bottombar from "../../components/bottombar/Bottombar";
-// import HomeTab from "../../components/tabs/HomeTab";
-import Tabs from "@mui/material/Tabs";
-import Tab from "@mui/material/Tab";
+import Bottombar from "../../components/Bottombar";
 import TaskList from "../../components/TaskList";
 
+import PropTypes from "prop-types";
+
+import Box from "@mui/material/Box";
+import Stack from "@mui/material/Stack";
 import Accordion from "@mui/material/Accordion";
 import AccordionSummary from "@mui/material/AccordionSummary";
 import AccordionDetails from "@mui/material/AccordionDetails";
@@ -67,37 +66,33 @@ export default function Home() {
   // const [tab, setTab] = React.useState(0);
 
   return (
-    <div className="pagebody">
-      <div className="top">
-        <Topbar header={"CalenDone"} />
-        {/* <HomeTab onSet={(num) => setActiveTabIndex(num)} /> */}
-        <Accordion disableGutters>
-          <AccordionSummary expandIcon={<ArrowDropDownIcon />} aria-controls="panel1-content" id="panel1-header">
-            <Typography>Unscheduled Tasks</Typography>
-          </AccordionSummary>
-          <AccordionDetails sx={{ paddingX: "0" }}>
-            <Typography>
-              <TaskList taskList={unschedList} />
-            </Typography>
-          </AccordionDetails>
-        </Accordion>
-        <Accordion>
-          <AccordionSummary expandIcon={<ArrowDropDownIcon />} aria-controls="panel2-content" id="panel2-header">
-            <Typography>Scheduled Tasks</Typography>
-          </AccordionSummary>
-          <AccordionDetails sx={{ paddingX: "0" }}>
-            <Typography>
-              <TaskList taskList={schedList} />
-            </Typography>
-          </AccordionDetails>
-        </Accordion>
-      </div>
-      <div className="middle">
-        {/* {activeTabIndex === 2 && (
-          <TaskList taskList={completeList} onShow={() => setIsSelected(true)} onHide={() => setIsSelected(false)} />
-        )} */}
-      </div>
-      <div className="bottom">{isSelected && <Bottombar />}</div>
-    </div>
+    <>
+      <Topbar header={"CalenDone"} />
+
+      {/* <HomeTab onSet={(num) => setActiveTabIndex(num)} /> */}
+
+      <Accordion disableGutters>
+        <AccordionSummary expandIcon={<ArrowDropDownIcon />} aria-controls="panel1-content" id="panel1-header">
+          <Typography>Unscheduled Tasks</Typography>
+        </AccordionSummary>
+        <AccordionDetails sx={{ paddingX: "0" }}>
+          <Typography>
+            <TaskList taskList={unschedList} />
+          </Typography>
+        </AccordionDetails>
+      </Accordion>
+      <Accordion>
+        <AccordionSummary expandIcon={<ArrowDropDownIcon />} aria-controls="panel2-content" id="panel2-header">
+          <Typography>Scheduled Tasks</Typography>
+        </AccordionSummary>
+        <AccordionDetails sx={{ paddingX: "0" }}>
+          <Typography>
+            <TaskList taskList={schedList} />
+          </Typography>
+        </AccordionDetails>
+      </Accordion>
+
+      <Bottombar />
+    </>
   );
 }
