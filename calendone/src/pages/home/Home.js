@@ -4,12 +4,18 @@ import { useState } from "react";
 import PropTypes from "prop-types";
 import Box from "@mui/material/Box";
 
-import Topbar from "../../components/topbar/Topbar";
+import Topbar from "../../components/Topbar";
 import Bottombar from "../../components/bottombar/Bottombar";
 // import HomeTab from "../../components/tabs/HomeTab";
 import Tabs from "@mui/material/Tabs";
 import Tab from "@mui/material/Tab";
 import TaskList from "../../components/TaskList";
+
+import Accordion from "@mui/material/Accordion";
+import AccordionSummary from "@mui/material/AccordionSummary";
+import AccordionDetails from "@mui/material/AccordionDetails";
+import Typography from "@mui/material/Typography";
+import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 
 function CustomTabPanel(props) {
   const { children, value, index, ...other } = props;
@@ -42,22 +48,22 @@ function a11yProps(index) {
 
 export default function Home() {
   const [isSelected, setIsSelected] = useState(false);
-  const [activeTabIndex, setActiveTabIndex] = useState(0);
+  // const [activeTabIndex, setActiveTabIndex] = useState(0);
 
   const unschedList = [];
-  for (let i = 0; i < 20; i++) {
+  for (let i = 0; i < 5; i++) {
     unschedList.push("Unscheduled Task " + i);
   }
 
   const schedList = [];
-  for (let i = 0; i < 20; i++) {
+  for (let i = 0; i < 5; i++) {
     schedList.push("Scheduled Task " + i);
   }
 
-  const completeList = [];
-  for (let i = 0; i < 20; i++) {
-    completeList.push("Completed Task " + i);
-  }
+  // const completeList = [];
+  // for (let i = 0; i < 20; i++) {
+  //   completeList.push("Completed Task " + i);
+  // }
 
   const [tab, setTab] = React.useState(0);
 
@@ -66,33 +72,31 @@ export default function Home() {
       <div className="top">
         <Topbar header={"CalenDone"} />
         {/* <HomeTab onSet={(num) => setActiveTabIndex(num)} /> */}
-        <Box sx={{ width: "100%" }}>
-          <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
-            <Tabs
-              value={tab}
-              onChange={(event, newValue) => {
-                setTab(newValue);
-              }}
-              variant="fullWidth"
-              aria-label="basic tabs example"
-            >
-              <Tab label="Unscheduled" {...a11yProps(0)} />
-              <Tab label="Scheduled" {...a11yProps(1)} />
-              <Tab label="Completed" {...a11yProps(2)} />
-            </Tabs>
-          </Box>
-        </Box>
+        <Accordion disableGutters>
+          <AccordionSummary expandIcon={<ArrowDropDownIcon />} aria-controls="panel1-content" id="panel1-header">
+            <Typography>Unscheduled Tasks</Typography>
+          </AccordionSummary>
+          <AccordionDetails sx={{ paddingX: "0" }}>
+            <Typography>
+              <TaskList taskList={unschedList} />
+            </Typography>
+          </AccordionDetails>
+        </Accordion>
+        <Accordion>
+          <AccordionSummary expandIcon={<ArrowDropDownIcon />} aria-controls="panel2-content" id="panel2-header">
+            <Typography>Scheduled Tasks</Typography>
+          </AccordionSummary>
+          <AccordionDetails sx={{ paddingX: "0" }}>
+            <Typography>
+              <TaskList taskList={schedList} />
+            </Typography>
+          </AccordionDetails>
+        </Accordion>
       </div>
       <div className="middle">
-        {activeTabIndex === 0 && (
-          <TaskList taskList={unschedList} onShow={() => setIsSelected(true)} onHide={() => setIsSelected(false)} />
-        )}
-        {activeTabIndex === 1 && (
-          <TaskList taskList={schedList} onShow={() => setIsSelected(true)} onHide={() => setIsSelected(false)} />
-        )}
-        {activeTabIndex === 2 && (
+        {/* {activeTabIndex === 2 && (
           <TaskList taskList={completeList} onShow={() => setIsSelected(true)} onHide={() => setIsSelected(false)} />
-        )}
+        )} */}
       </div>
       <div className="bottom">{isSelected && <Bottombar />}</div>
     </div>
