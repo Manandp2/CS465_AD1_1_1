@@ -2,11 +2,23 @@ import "./App.css";
 import { useState } from "react";
 import Home from "./pages/home/Home";
 // import Settings from './pages/settings/Settings';
+import {auth} from "./utils/firebase";
+import SignIn from "./pages/SignIn";
+
+
 
 function App() {
+
+  const [currentUser, setCurrentUser] = useState(auth.currentUser);
   const [curPage, setCurPage] = useState("Home");
-  if (curPage === "Home") {
-    return <Home />;
+  if (curPage === "Home" &&  currentUser !== null) {
+    console.log(currentUser);
+    return <Home setUser={setCurrentUser}/>;
+  } else {
+    console.log(currentUser);
+    return (
+      <SignIn setUser={setCurrentUser}/>
+    );
   }
   // return (
   //   <div>

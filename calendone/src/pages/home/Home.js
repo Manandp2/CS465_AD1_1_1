@@ -16,6 +16,10 @@ import AccordionSummary from "@mui/material/AccordionSummary";
 import AccordionDetails from "@mui/material/AccordionDetails";
 import Typography from "@mui/material/Typography";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
+import { signOut } from "firebase/auth";
+import { Button } from "@mui/material";
+import { auth, db } from "../../utils/firebase";
+import { doc, updateDoc, collection, setDoc } from "firebase/firestore";
 
 function CustomTabPanel(props) {
   const { children, value, index, ...other } = props;
@@ -46,7 +50,7 @@ function a11yProps(index) {
   };
 }
 
-export default function Home() {
+export default function Home(props) {
   const [isSelected, setIsSelected] = useState(false);
   // const [activeTabIndex, setActiveTabIndex] = useState(0);
 
@@ -60,17 +64,41 @@ export default function Home() {
     schedList.push("Scheduled Task " + i);
   }
 
+  const addTodoToFirestore = () => {
+    const tasksCollectionRef = collection(db, "users", auth.currentUser.uid, "tasks");
+    const taskDocRef = doc(tasksCollectionRef);
+    setDoc(taskDocRef, {name: "Task 1", description: "Description 1", dueDate: "2022-12-31", isComplete: false})
+    .then(() => {
+      console.log("Task added to Firestore");
+    })
+    .catch((error) => {
+      console.log(error);
+    });
+  }
   // const completeList = [];
   // for (let i = 0; i < 20; i++) {
   //   completeList.push("Completed Task " + i);
   // }
   // const [tab, setTab] = React.useState(0);
 
+  const SignOut = () => {
+    signOut(auth)
+    .then(() => {
+      console.log("Signed out");
+      props.setUser(null);
+    })
+    .catch((error) => {
+      console.log(error);
+    });
+  }
+
   return (
     <div className="pagebody">
       <div className="top">
         <Topbar header={"CalenDone"} />
         {/* <HomeTab onSet={(num) => setActiveTabIndex(num)} /> */}
+        <Button onClick={SignOut}>Sign Out</Button>
+        <Button onClick={addTodoToFirestore}>Add Todo</Button>
         <Accordion disableGutters>
           <AccordionSummary expandIcon={<ArrowDropDownIcon />} aria-controls="panel1-content" id="panel1-header">
             <Typography>Unscheduled Tasks</Typography>
