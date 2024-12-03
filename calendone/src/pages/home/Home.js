@@ -6,7 +6,6 @@ import Box from "@mui/material/Box";
 
 import Topbar from "../../components/Topbar";
 import Bottombar from "../../components/Bottombar";
-// import HomeTab from "../../components/tabs/HomeTab";
 import Tabs from "@mui/material/Tabs";
 import Tab from "@mui/material/Tab";
 import TaskList from "../../components/TaskList";

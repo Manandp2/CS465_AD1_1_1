@@ -1,8 +1,12 @@
 import React from "react";
 
-import { Paper, Typography } from "@mui/material";
+import { Paper, Typography, IconButton } from "@mui/material";
 
-export default function Topbar({ header }) {
+import SettingsIcon from '@mui/icons-material/Settings';
+import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
+import ChecklistIcon from '@mui/icons-material/Checklist';
+
+export default function Bottombar() {
   return (
     <Paper
         square
@@ -10,7 +14,7 @@ export default function Topbar({ header }) {
         sx={{
           backgroundColor: "#6d3b79",
           color: "white",
-          paddingY: "3%",
+          paddingY: "1%",
           position: "fixed",
           bottom: "0",
           left: 0,
@@ -18,7 +22,9 @@ export default function Topbar({ header }) {
           textAlign: "center"
         }}
       >
-        <Typography variant="h4">"Bottom Bar"</Typography>
+        <IconButton sx={{ color: "white" }}><SettingsIcon fontSize="large" /></IconButton>
+        <IconButton sx={{ color: "white" }}><AddCircleOutlineIcon fontSize="large" /></IconButton>
+        <IconButton sx={{ color: "white" }}><ChecklistIcon fontSize="large" /></IconButton>
       </Paper>
   );
 }
