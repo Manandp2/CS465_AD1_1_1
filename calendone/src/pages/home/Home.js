@@ -1,4 +1,4 @@
-import "./Home.css";
+// import "./Home.css";
 import React from "react";
 import { useState } from "react";
 import PropTypes from "prop-types";
@@ -16,6 +16,7 @@ import AccordionSummary from "@mui/material/AccordionSummary";
 import AccordionDetails from "@mui/material/AccordionDetails";
 import Typography from "@mui/material/Typography";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
+import { CssBaseline, Paper } from "@mui/material";
 
 function CustomTabPanel(props) {
   const { children, value, index, ...other } = props;
@@ -51,12 +52,12 @@ export default function Home() {
   // const [activeTabIndex, setActiveTabIndex] = useState(0);
 
   const unschedList = [];
-  for (let i = 0; i < 5; i++) {
+  for (let i = 0; i < 10; i++) {
     unschedList.push("Unscheduled Task " + i);
   }
 
   const schedList = [];
-  for (let i = 0; i < 5; i++) {
+  for (let i = 0; i < 10; i++) {
     schedList.push("Scheduled Task " + i);
   }
 
@@ -67,10 +68,11 @@ export default function Home() {
   // const [tab, setTab] = React.useState(0);
 
   return (
-    <div className="pagebody">
-      <div className="top">
-        <Topbar header={"CalenDone"} />
-        {/* <HomeTab onSet={(num) => setActiveTabIndex(num)} /> */}
+    <div>
+      <Paper square elevation={3} sx={{ backgroundColor: "white", color: "white", paddingY: "3%" }}>
+        <Typography variant="h4">PLACEHOLDER</Typography>
+      </Paper>
+      <Paper sx={{ overflowY: "scroll" }}>
         <Accordion disableGutters>
           <AccordionSummary expandIcon={<ArrowDropDownIcon />} aria-controls="panel1-content" id="panel1-header">
             <Typography>Unscheduled Tasks</Typography>
@@ -91,13 +93,39 @@ export default function Home() {
             </Typography>
           </AccordionDetails>
         </Accordion>
-      </div>
-      <div className="middle">
-        {/* {activeTabIndex === 2 && (
-          <TaskList taskList={completeList} onShow={() => setIsSelected(true)} onHide={() => setIsSelected(false)} />
-        )} */}
-      </div>
-      <div className="bottom">{isSelected && <Bottombar />}</div>
+      </Paper>
+      {/* TOPBAR */}
+      <Paper
+        square
+        elevation={3}
+        sx={{
+          backgroundColor: "#6d3b79",
+          color: "white",
+          paddingY: "3%",
+          position: "fixed",
+          top: "0",
+          left: 0,
+          right: 0,
+        }}
+      >
+        <Typography variant="h4">"CalenDone"</Typography>
+      </Paper>
+      {/* BOTTOM BAR */}
+      <Paper
+        square
+        elevation={3}
+        sx={{
+          backgroundColor: "#6d3b79",
+          color: "white",
+          paddingY: "3%",
+          position: "fixed",
+          bottom: "0",
+          left: 0,
+          right: 0,
+        }}
+      >
+        <Typography variant="h4">"Bottom Bar"</Typography>
+      </Paper>
     </div>
   );
 }
