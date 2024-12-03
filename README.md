@@ -6,5 +6,3 @@ To compile on your local machine, try running these commands in the terminal wit
 - npm install google-calendar-react
 - npm i gapi-script
 - npm start
-
-
