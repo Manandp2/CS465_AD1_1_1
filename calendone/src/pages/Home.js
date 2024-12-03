@@ -93,9 +93,38 @@ export default function Home() {
           </AccordionDetails>
         </Accordion>
       </Paper>
-
-      <Topbar header={"CalenDone"} />
-      <Bottombar />
+      {/* TOPBAR */}
+      <Paper
+        square
+        elevation={3}
+        sx={{
+          backgroundColor: "#6d3b79",
+          color: "white",
+          paddingY: "3%",
+          position: "fixed",
+          top: "0",
+          left: 0,
+          right: 0,
+        }}
+      >
+        <Typography variant="h4">"CalenDone"</Typography>
+      </Paper>
+      {/* BOTTOM BAR */}
+      <Paper
+        square
+        elevation={3}
+        sx={{
+          backgroundColor: "#6d3b79",
+          color: "white",
+          paddingY: "3%",
+          position: "fixed",
+          bottom: "0",
+          left: 0,
+          right: 0,
+        }}
+      >
+        <Typography variant="h4">"Bottom Bar"</Typography>
+      </Paper>
     </div>
   );
 }
