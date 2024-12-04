@@ -1,8 +1,4 @@
 import React from "react";
-import "@material/web/icon/icon.js";
-import "@material/web/iconbutton/icon-button.js";
-import "@material/web/list/list.js";
-import "@material/web/list/list-item.js";
 import EditIcon from "@mui/icons-material/Edit";
 
 import List from "@mui/material/List";
@@ -12,10 +8,9 @@ import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
 import Checkbox from "@mui/material/Checkbox";
 import IconButton from "@mui/material/IconButton";
-import CommentIcon from "@mui/icons-material/Comment";
 
-export default function TaskList({ taskList }) {
-  const [checked, setChecked] = React.useState([0]);
+export default function TaskList({ taskList, checked, setChecked }) {
+  // const [checked, setChecked] = React.useState([0]);
 
   const handleToggle = (value) => () => {
     const currentIndex = checked.indexOf(value);
@@ -28,6 +23,7 @@ export default function TaskList({ taskList }) {
     }
 
     setChecked(newChecked);
+    console.log(newChecked);
   };
 
   return (

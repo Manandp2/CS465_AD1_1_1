@@ -19,7 +19,7 @@ function SignIn(props) {
           { merge: true }
         ).then(() => {
           console.log("accessToken saved");
-        })
+        });
       })
       .catch((error) => {
         console.log(error);

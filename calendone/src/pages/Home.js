@@ -5,8 +5,6 @@ import Box from "@mui/material/Box";
 
 import Topbar from "../components/Topbar";
 import Bottombar from "../components/Bottombar";
-import Tabs from "@mui/material/Tabs";
-import Tab from "@mui/material/Tab";
 import TaskList from "../components/TaskList";
 
 import Accordion from "@mui/material/Accordion";
@@ -51,7 +49,7 @@ function a11yProps(index) {
   };
 }
 
-export default function Home(props) {
+export default function Home({ setUser, setPage }) {
   const addTodoToFirestore = () => {
     const tasksCollectionRef = collection(db, "users", auth.currentUser.uid, "tasks");
     const taskDocRef = doc(tasksCollectionRef);
@@ -67,7 +65,7 @@ export default function Home(props) {
     signOut(auth)
       .then(() => {
         console.log("Signed out");
-        props.setUser(null);
+        setUser(null);
       })
       .catch((error) => {
         console.log(error);
@@ -77,7 +75,7 @@ export default function Home(props) {
   // const [activeTabIndex, setActiveTabIndex] = useState(0);
 
   const unschedList = [];
-  for (let i = 0; i < 10; i++) {
+  for (let i = 0; i < 5; i++) {
     unschedList.push("Unscheduled Task " + i);
   }
 
@@ -86,11 +84,9 @@ export default function Home(props) {
     schedList.push("Scheduled Task " + i);
   }
 
-  // const completeList = [];
-  // for (let i = 0; i < 20; i++) {
-  //   completeList.push("Completed Task " + i);
-  // }
-  // const [tab, setTab] = React.useState(0);
+  // const [checkedUnsched, setCheckedUnsched] = React.useState([0]);
+  const [unschedChecked, setUnschedChecked] = React.useState([]);
+  const [schedChecked, setSchedChecked] = React.useState([]);
 
   return (
     <div>
@@ -107,7 +103,7 @@ export default function Home(props) {
           </AccordionSummary>
           <AccordionDetails sx={{ paddingX: "0" }}>
             <Typography>
-              <TaskList taskList={unschedList} />
+              <TaskList taskList={unschedList} checked={unschedChecked} setChecked={setUnschedChecked} />
             </Typography>
           </AccordionDetails>
         </Accordion>
@@ -117,7 +113,7 @@ export default function Home(props) {
           </AccordionSummary>
           <AccordionDetails sx={{ paddingX: "0" }}>
             <Typography>
-              <TaskList taskList={schedList} />
+              <TaskList taskList={schedList} checked={schedChecked} setChecked={setSchedChecked} />
             </Typography>
           </AccordionDetails>
         </Accordion>
@@ -141,7 +137,11 @@ export default function Home(props) {
           CalenDone
         </Typography>
       </Paper>
-      <Bottombar />
+      {unschedChecked.length === 0 && schedChecked.length === 0 ? (
+        <Bottombar status={"Home"} setPage={setPage} />
+      ) : (
+        <Bottombar status={"Selected Home"} setPage={setPage} />
+      )}
     </div>
   );
 }
