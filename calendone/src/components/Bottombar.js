@@ -3,19 +3,19 @@ import React from "react";
 import { Paper, Stack, IconButton } from "@mui/material";
 
 // Icons
-import SettingsIcon from '@mui/icons-material/Settings';
-import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
-import ChecklistIcon from '@mui/icons-material/Checklist';
-import DoneAllIcon from '@mui/icons-material/DoneAll';
+import SettingsIcon from "@mui/icons-material/Settings";
+import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
+import ChecklistIcon from "@mui/icons-material/Checklist";
+import DoneAllIcon from "@mui/icons-material/DoneAll";
 
 // Might change this icon
-import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
+import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
 
-import HomeIcon from '@mui/icons-material/Home';
-import RemoveDoneIcon from '@mui/icons-material/RemoveDone';
-import DeleteIcon from '@mui/icons-material/Delete';
+import HomeIcon from "@mui/icons-material/Home";
+import RemoveDoneIcon from "@mui/icons-material/RemoveDone";
+import DeleteIcon from "@mui/icons-material/Delete";
 
-export default function Bottombar({status, setPage}) {
+export default function Bottombar({ status, setPage }) {
   return (
     <Paper
       square
@@ -31,82 +31,86 @@ export default function Bottombar({status, setPage}) {
         textAlign: "center",
       }}
     >
-      {(status == "Home") &&
-      <Stack
-        direction="row"
-        spacing={0}
-        sx={{
-          justifyContent: "space-around",
-          alignItems: "center",
-        }}
-      >
-        <IconButton sx={{ color: "white" }}>
-          <SettingsIcon sx={{ fontSize: "170%" }} />
-        </IconButton>
-        <IconButton sx={{ color: "white" }}>
-          <AddCircleOutlineIcon sx={{ fontSize: "170%" }} />
-        </IconButton>
-        <IconButton sx={{ color: "white" }} onClick={() => setPage("Completed")}>
-          <ChecklistIcon sx={{ fontSize: "170%" }} />
-        </IconButton>
-      </Stack>}
-      {(status == "Selected Home") &&
-      <Stack
-        direction="row"
-        spacing={0}
-        sx={{
-          justifyContent: "space-around",
-          alignItems: "center",
-        }}
-      >
-        <IconButton sx={{ color: "white" }}>
-          <DeleteIcon sx={{ fontSize: "170%" }} />
-        </IconButton>
-        <IconButton sx={{ color: "white" }}>
-          <CalendarMonthIcon sx={{ fontSize: "170%" }} />
-        </IconButton>
-        <IconButton sx={{ color: "white" }}>
-          <DoneAllIcon sx={{ fontSize: "170%" }} />
-        </IconButton>
-      </Stack>}
-      {(status == "Completed") &&
-      <Stack
-        direction="row"
-        spacing={0}
-        sx={{
-          justifyContent: "space-around",
-          alignItems: "center",
-        }}
-      >
-        <IconButton disabled sx={{ color: "white" }}>
-          <DeleteIcon sx={{ fontSize: "170%" }} />
-        </IconButton>
-        <IconButton disabled sx={{ color: "white" }}>
-          <RemoveDoneIcon sx={{ fontSize: "170%" }} />
-        </IconButton>
-        <IconButton sx={{ color: "white" }} onClick={() => setPage("Home")}>
-          <HomeIcon sx={{ fontSize: "170%" }} />
-        </IconButton>
-      </Stack>}
-      {(status == "Selected Completed") &&
-      <Stack
-        direction="row"
-        spacing={0}
-        sx={{
-          justifyContent: "space-around",
-          alignItems: "center",
-        }}
-      >
-        <IconButton sx={{ color: "white" }}>
-          <DeleteIcon sx={{ fontSize: "170%" }} />
-        </IconButton>
-        <IconButton sx={{ color: "white" }}>
-          <RemoveDoneIcon sx={{ fontSize: "170%" }} />
-        </IconButton>
-        <IconButton sx={{ color: "white" }} onClick={() => setPage("Home")}>
-          <HomeIcon sx={{ fontSize: "170%" }} />
-        </IconButton>
-      </Stack>}
+      {status == "Home" && (
+        <Stack
+          direction="row"
+          spacing={0}
+          sx={{
+            justifyContent: "space-around",
+            alignItems: "center",
+          }}
+        >
+          <IconButton sx={{ color: "white" }}>
+            <SettingsIcon sx={{ fontSize: "170%" }} />
+          </IconButton>
+          <IconButton sx={{ color: "white" }}>
+            <AddCircleOutlineIcon sx={{ fontSize: "170%" }} />
+          </IconButton>
+          <IconButton sx={{ color: "white" }} onClick={() => setPage("Completed")}>
+            <ChecklistIcon sx={{ fontSize: "170%" }} />
+          </IconButton>
+        </Stack>
+      )}
+      {status == "Selected Home" && (
+        <Stack
+          direction="row"
+          spacing={0}
+          sx={{
+            justifyContent: "space-around",
+            alignItems: "center",
+          }}
+        >
+          <IconButton sx={{ color: "white" }}>
+            <DeleteIcon sx={{ fontSize: "170%" }} />
+          </IconButton>
+          <IconButton sx={{ color: "white" }}>
+            <CalendarMonthIcon sx={{ fontSize: "170%" }} />
+          </IconButton>
+          <IconButton sx={{ color: "white" }}>
+            <DoneAllIcon sx={{ fontSize: "170%" }} />
+          </IconButton>
+        </Stack>
+      )}
+      {status == "Completed" && (
+        <Stack
+          direction="row"
+          spacing={0}
+          sx={{
+            justifyContent: "space-around",
+            alignItems: "center",
+          }}
+        >
+          <IconButton disabled sx={{ color: "white" }}>
+            <DeleteIcon sx={{ fontSize: "170%" }} />
+          </IconButton>
+          <IconButton disabled sx={{ color: "white" }}>
+            <RemoveDoneIcon sx={{ fontSize: "170%" }} />
+          </IconButton>
+          <IconButton sx={{ color: "white" }} onClick={() => setPage("Home")}>
+            <HomeIcon sx={{ fontSize: "170%" }} />
+          </IconButton>
+        </Stack>
+      )}
+      {status == "Selected Completed" && (
+        <Stack
+          direction="row"
+          spacing={0}
+          sx={{
+            justifyContent: "space-around",
+            alignItems: "center",
+          }}
+        >
+          <IconButton sx={{ color: "white" }}>
+            <DeleteIcon sx={{ fontSize: "170%" }} />
+          </IconButton>
+          <IconButton sx={{ color: "white" }}>
+            <RemoveDoneIcon sx={{ fontSize: "170%" }} />
+          </IconButton>
+          <IconButton sx={{ color: "white" }} onClick={() => setPage("Home")}>
+            <HomeIcon sx={{ fontSize: "170%" }} />
+          </IconButton>
+        </Stack>
+      )}
     </Paper>
   );
 }

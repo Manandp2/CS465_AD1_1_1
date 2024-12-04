@@ -14,6 +14,12 @@ import Typography from "@mui/material/Typography";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 import { CssBaseline, Paper } from "@mui/material";
 
+import { signOut } from "firebase/auth";
+import { Button } from "@mui/material";
+import { auth, db } from "../utils/firebase";
+import { doc, updateDoc, collection, setDoc } from "firebase/firestore";
+import AddModal from "../components/AddDialog";
+
 function CustomTabPanel(props) {
   const { children, value, index, ...other } = props;
 
@@ -44,6 +50,28 @@ function a11yProps(index) {
 }
 
 export default function Home({ setUser, setPage }) {
+  const addTodoToFirestore = () => {
+    const tasksCollectionRef = collection(db, "users", auth.currentUser.uid, "tasks");
+    const taskDocRef = doc(tasksCollectionRef);
+    setDoc(taskDocRef, { name: "Task 1", description: "Description 1", dueDate: "2022-12-31", isComplete: false })
+      .then(() => {
+        console.log("Task added to Firestore");
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  };
+  const SignOut = () => {
+    signOut(auth)
+      .then(() => {
+        console.log("Signed out");
+        props.setUser(null);
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  };
+  const [isSelected, setIsSelected] = useState(false);
   // const [activeTabIndex, setActiveTabIndex] = useState(0);
 
   const unschedList = [];
@@ -66,6 +94,9 @@ export default function Home({ setUser, setPage }) {
         <Typography variant="h4">PLACEHOLDER</Typography>
       </Paper>
       <Paper sx={{ overflowY: "scroll" }}>
+        <AddModal />
+        <Button onClick={SignOut}>Sign Out</Button>
+        <Button onClick={addTodoToFirestore}>Add Todo</Button>
         <Accordion disableGutters>
           <AccordionSummary expandIcon={<ArrowDropDownIcon />} aria-controls="panel1-content" id="panel1-header">
             <Typography>Unscheduled Tasks</Typography>
@@ -88,8 +119,25 @@ export default function Home({ setUser, setPage }) {
         </Accordion>
       </Paper>
 
-      <Topbar header={"CalenDone"} />
-      {(unschedChecked.length === 0 && schedChecked.length === 0) ? (
+      {/* TOPBAR */}
+      <Paper
+        square
+        elevation={3}
+        sx={{
+          backgroundColor: "#6d3b79",
+          color: "white",
+          paddingY: "3%",
+          position: "fixed",
+          top: "0",
+          left: 0,
+          right: 0,
+        }}
+      >
+        <Typography variant="h4" sx={{ textAlign: "center" }}>
+          CalenDone
+        </Typography>
+      </Paper>
+      {unschedChecked.length === 0 && schedChecked.length === 0 ? (
         <Bottombar status={"Home"} setPage={setPage} />
       ) : (
         <Bottombar status={"Selected Home"} setPage={setPage} />
