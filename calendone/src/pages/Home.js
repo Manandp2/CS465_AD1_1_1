@@ -43,12 +43,11 @@ function a11yProps(index) {
   };
 }
 
-export default function Home({setUser, setPage}) {
-  const [isSelected, setIsSelected] = useState(false);
+export default function Home({ setUser, setPage }) {
   // const [activeTabIndex, setActiveTabIndex] = useState(0);
 
   const unschedList = [];
-  for (let i = 0; i < 10; i++) {
+  for (let i = 0; i < 5; i++) {
     unschedList.push("Unscheduled Task " + i);
   }
 
@@ -56,6 +55,10 @@ export default function Home({setUser, setPage}) {
   for (let i = 0; i < 10; i++) {
     schedList.push("Scheduled Task " + i);
   }
+
+  // const [checkedUnsched, setCheckedUnsched] = React.useState([0]);
+  const [unschedChecked, setUnschedChecked] = React.useState([]);
+  const [schedChecked, setSchedChecked] = React.useState([]);
 
   return (
     <div>
@@ -69,7 +72,7 @@ export default function Home({setUser, setPage}) {
           </AccordionSummary>
           <AccordionDetails sx={{ paddingX: "0" }}>
             <Typography>
-              <TaskList taskList={unschedList} currSelect={isSelected} setIsSelected={setIsSelected} />
+              <TaskList taskList={unschedList} checked={unschedChecked} setChecked={setUnschedChecked} />
             </Typography>
           </AccordionDetails>
         </Accordion>
@@ -79,15 +82,18 @@ export default function Home({setUser, setPage}) {
           </AccordionSummary>
           <AccordionDetails sx={{ paddingX: "0" }}>
             <Typography>
-              <TaskList taskList={schedList} />
+              <TaskList taskList={schedList} checked={schedChecked} setChecked={setSchedChecked} />
             </Typography>
           </AccordionDetails>
         </Accordion>
       </Paper>
-      
+
       <Topbar header={"CalenDone"} />
-      {!isSelected && <Bottombar status={"Home"} setPage={setPage} />}
-      {isSelected && <Bottombar status={"Selected Home"} setPage={setPage} />}
+      {unschedChecked.length === 0 ? (
+        <Bottombar status={"Home"} setPage={setPage} />
+      ) : (
+        <Bottombar status={"Selected Home"} setPage={setPage} />
+      )}
     </div>
   );
 }
