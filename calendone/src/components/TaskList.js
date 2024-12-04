@@ -62,26 +62,3 @@ export default function TaskList({ taskList }) {
     </List>
   );
 }
-
-// export default function TaskList({ taskList }) {
-//   return (
-//     <div>
-//       <md-list>
-//         {taskList.map((task) => (
-//           <TaskItem task={task} />
-//         ))}
-//       </md-list>
-//     </div>
-//   );
-// }
-
-function TaskItem({ task }) {
-  return (
-    <md-list-item type="button">
-      <div slot="start">{task}</div>
-      <md-icon-button slot="end">
-        <EditIcon />
-      </md-icon-button>
-    </md-list-item>
-  );
-}
