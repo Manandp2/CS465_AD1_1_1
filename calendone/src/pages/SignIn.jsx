@@ -1,5 +1,3 @@
-import { useState } from "react";
-// import Settings from './pages/settings/Settings';
 import { auth, db } from "../utils/firebase";
 import { signInWithPopup, GoogleAuthProvider } from "firebase/auth";
 import { doc, setDoc } from "firebase/firestore";
@@ -20,9 +18,8 @@ function SignIn(props) {
           },
           { merge: true }
         ).then(() => {
-          console.log("yay");
-          sendEventToGoogleCalendar(cred.accessToken);
-        });
+          console.log("accessToken saved");
+        })
       })
       .catch((error) => {
         console.log(error);

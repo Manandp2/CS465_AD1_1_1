@@ -1,15 +1,25 @@
-// import "./App.css";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Home from "./pages/Home";
 // import Settings from './pages/settings/Settings';
 import { auth } from "./utils/firebase";
 import SignIn from "./pages/SignIn";
+import { onAuthStateChanged } from "firebase/auth";
 import { LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 
 function App() {
-  const [currentUser, setCurrentUser] = useState(auth.currentUser);
+  const [currentUser, setCurrentUser] = useState(null);
   const [curPage, setCurPage] = useState("Home");
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      setCurrentUser(user);
+    });
+
+    // Cleanup subscription on unmount
+    return () => unsubscribe();
+  }, []);
+
 
   if (curPage === "Home" && currentUser !== null) {
     console.log(currentUser);
@@ -19,18 +29,8 @@ function App() {
       </LocalizationProvider>
     );
   } else {
-    console.log(currentUser);
     return <SignIn setUser={setCurrentUser} />;
   }
-  // return (
-  //   <div>
-  //     {/* Material Design Icons import */}
-  //     <link
-  //       rel="stylesheet"
-  //       href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0"
-  //     />
-  //   </div>
-  // );
 }
 
 export default App;
