@@ -32,14 +32,8 @@ export default function Bottombar({status}) {
         direction="row"
         spacing={0}
         sx={{
-          backgroundColor: "#6d3b79",
-          color: "white",
-          paddingY: "1%",
-          position: "fixed",
-          bottom: "0",
-          left: 0,
-          right: 0,
-          textAlign: "center"
+          justifyContent: "space-around",
+          alignItems: "center",
         }}
       >
         <IconButton sx={{ color: "white" }}>
