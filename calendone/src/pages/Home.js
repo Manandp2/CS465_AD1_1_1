@@ -65,7 +65,7 @@ export default function Home({ setUser, setPage }) {
     signOut(auth)
       .then(() => {
         console.log("Signed out");
-        props.setUser(null);
+        setUser(null);
       })
       .catch((error) => {
         console.log(error);
