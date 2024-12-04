@@ -4,6 +4,8 @@ import Home from "./pages/Home";
 import { auth } from "./utils/firebase";
 import SignIn from "./pages/SignIn";
 import { onAuthStateChanged } from "firebase/auth";
+import { LocalizationProvider } from "@mui/x-date-pickers";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 
 function App() {
   const [currentUser, setCurrentUser] = useState(null);
@@ -18,8 +20,14 @@ function App() {
     return () => unsubscribe();
   }, []);
 
+
   if (curPage === "Home" && currentUser !== null) {
-    return <Home setUser={setCurrentUser} />;
+    console.log(currentUser);
+    return (
+      <LocalizationProvider dateAdapter={AdapterDayjs}>
+        <Home setUser={setCurrentUser} />
+      </LocalizationProvider>
+    );
   } else {
     return <SignIn setUser={setCurrentUser} />;
   }
