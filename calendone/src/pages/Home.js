@@ -84,7 +84,7 @@ export default function Home() {
           </AccordionDetails>
         </Accordion>
       </Paper>
-
+      
       <Topbar header={"CalenDone"} />
       <Bottombar status={"Home"} />
     </div>

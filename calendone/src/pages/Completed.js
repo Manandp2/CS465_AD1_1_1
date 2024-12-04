@@ -7,7 +7,11 @@ import Topbar from "../components/Topbar";
 import Bottombar from "../components/Bottombar";
 import TaskList from "../components/TaskList";
 
+import Accordion from "@mui/material/Accordion";
+import AccordionSummary from "@mui/material/AccordionSummary";
+import AccordionDetails from "@mui/material/AccordionDetails";
 import Typography from "@mui/material/Typography";
+import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 import { CssBaseline, Paper } from "@mui/material";
 
 function CustomTabPanel(props) {
@@ -54,10 +58,19 @@ export default function Completed() {
         <Typography variant="h4">PLACEHOLDER</Typography>
       </Paper>
       <Paper sx={{ overflowY: "scroll" }}>
-        <TaskList taskList={completedList} />
+      <Accordion disableGutters defaultExpanded>
+          <AccordionSummary expandIcon={<ArrowDropDownIcon />} aria-controls="panel1-content" id="panel1-header">
+            <Typography>Completed Tasks</Typography>
+          </AccordionSummary>
+          <AccordionDetails sx={{ paddingX: "0" }}>
+            <Typography>
+              <TaskList taskList={completedList} />
+            </Typography>
+          </AccordionDetails>
+        </Accordion>
       </Paper>
 
-      <Topbar header={"Completed"} />
+      <Topbar header={"CalenDone"} />
       <Bottombar status={"Completed"} />
     </div>
   );
