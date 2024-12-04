@@ -1,4 +1,3 @@
-// import "./Home.css";
 import React from "react";
 import { useState } from "react";
 import PropTypes from "prop-types";
@@ -6,8 +5,6 @@ import Box from "@mui/material/Box";
 
 import Topbar from "../components/Topbar";
 import Bottombar from "../components/Bottombar";
-import Tabs from "@mui/material/Tabs";
-import Tab from "@mui/material/Tab";
 import TaskList from "../components/TaskList";
 
 import Accordion from "@mui/material/Accordion";
@@ -60,12 +57,6 @@ export default function Home() {
     schedList.push("Scheduled Task " + i);
   }
 
-  // const completeList = [];
-  // for (let i = 0; i < 20; i++) {
-  //   completeList.push("Completed Task " + i);
-  // }
-  // const [tab, setTab] = React.useState(0);
-
   return (
     <div>
       <Paper square elevation={3} sx={{ backgroundColor: "white", color: "white", paddingY: "3%" }}>
@@ -95,7 +86,7 @@ export default function Home() {
       </Paper>
 
       <Topbar header={"CalenDone"} />
-      <Bottombar />
+      <Bottombar status={"Home"} />
     </div>
   );
 }
