@@ -1,6 +1,6 @@
 // import "./App.css";
 import { useState } from "react";
-import Home from "./pages/home/Home";
+import Home from "./pages/Home";
 // import Settings from './pages/settings/Settings';
 import { auth } from "./utils/firebase";
 import SignIn from "./pages/SignIn";
