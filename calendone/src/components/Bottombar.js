@@ -65,7 +65,7 @@ export default function Bottombar({status, setPage}) {
         <IconButton sx={{ color: "white" }}>
           <CalendarMonthIcon sx={{ fontSize: "170%" }} />
         </IconButton>
-        <IconButton sx={{ color: "white" }} onClick={() => setPage("Completed")}>
+        <IconButton sx={{ color: "white" }}>
           <DoneAllIcon sx={{ fontSize: "170%" }} />
         </IconButton>
       </Stack>}
@@ -103,7 +103,7 @@ export default function Bottombar({status, setPage}) {
         <IconButton sx={{ color: "white" }}>
           <RemoveDoneIcon sx={{ fontSize: "170%" }} />
         </IconButton>
-        <IconButton sx={{ color: "white" }} onClick={() => setPage("Home")}>
+        <IconButton sx={{ color: "white" }}>
           <HomeIcon sx={{ fontSize: "170%" }} />
         </IconButton>
       </Stack>}

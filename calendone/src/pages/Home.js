@@ -79,7 +79,7 @@ export default function Home({setUser, setPage}) {
           </AccordionSummary>
           <AccordionDetails sx={{ paddingX: "0" }}>
             <Typography>
-              <TaskList taskList={schedList} />
+              <TaskList taskList={schedList} currSelect={isSelected} setIsSelected={setIsSelected} />
             </Typography>
           </AccordionDetails>
         </Accordion>

@@ -23,6 +23,7 @@ export default function TaskList({ taskList, currSelect, setIsSelected }) {
     }
 
     setChecked(newChecked);
+    
     setIsSelected(!currSelect)
   };
 
