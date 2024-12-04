@@ -46,6 +46,7 @@ function a11yProps(index) {
 export default function Completed({setUser, setPage}) {
   const [isSelected, setIsSelected] = useState(false);
   // const [activeTabIndex, setActiveTabIndex] = useState(0);
+  const [completedChecked, setCompletedChecked] = React.useState([]);
 
   const completedList = [];
   for (let i = 0; i < 10; i++) {
@@ -64,15 +65,18 @@ export default function Completed({setUser, setPage}) {
             </AccordionSummary>
             <AccordionDetails sx={{ paddingX: "0" }}>
                 <Typography>
-                <TaskList taskList={completedList} currSelect={isSelected} setIsSelected={setIsSelected} />
+                <TaskList taskList={completedList} checked={completedChecked} setChecked={setCompletedChecked} />
                 </Typography>
             </AccordionDetails>
             </Accordion>
         </Paper>
 
         <Topbar header={"CalenDone"} />
-        {!isSelected && <Bottombar status={"Completed"} setPage={setPage} />}
-        {isSelected && <Bottombar status={"Selected Completed"} setPage={setPage} />}
+        {completedChecked.length === 0 ? (
+            <Bottombar status={"Completed"} setPage={setPage} />
+        ) : (
+            <Bottombar status={"Selected Completed"} setPage={setPage} />
+        )}
     </div>
   );
 }

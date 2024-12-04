@@ -103,7 +103,7 @@ export default function Bottombar({status, setPage}) {
         <IconButton sx={{ color: "white" }}>
           <RemoveDoneIcon sx={{ fontSize: "170%" }} />
         </IconButton>
-        <IconButton sx={{ color: "white" }}>
+        <IconButton sx={{ color: "white" }} onClick={() => setPage("Home")}>
           <HomeIcon sx={{ fontSize: "170%" }} />
         </IconButton>
       </Stack>}

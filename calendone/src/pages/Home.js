@@ -89,7 +89,7 @@ export default function Home({ setUser, setPage }) {
       </Paper>
 
       <Topbar header={"CalenDone"} />
-      {unschedChecked.length === 0 ? (
+      {(unschedChecked.length === 0 && schedChecked.length === 0) ? (
         <Bottombar status={"Home"} setPage={setPage} />
       ) : (
         <Bottombar status={"Selected Home"} setPage={setPage} />
