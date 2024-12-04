@@ -64,14 +64,15 @@ export default function Completed({setUser, setPage}) {
             </AccordionSummary>
             <AccordionDetails sx={{ paddingX: "0" }}>
                 <Typography>
-                <TaskList taskList={completedList} />
+                <TaskList taskList={completedList} currSelect={isSelected} setIsSelected={setIsSelected} />
                 </Typography>
             </AccordionDetails>
             </Accordion>
         </Paper>
 
         <Topbar header={"CalenDone"} />
-        <Bottombar status={"Completed"} setPage={setPage} />
+        {!isSelected && <Bottombar status={"Completed"} setPage={setPage} />}
+        {isSelected && <Bottombar status={"Selected Completed"} setPage={setPage} />}
     </div>
   );
 }

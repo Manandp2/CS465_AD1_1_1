@@ -9,7 +9,7 @@ import ListItemText from "@mui/material/ListItemText";
 import Checkbox from "@mui/material/Checkbox";
 import IconButton from "@mui/material/IconButton";
 
-export default function TaskList({ taskList }) {
+export default function TaskList({ taskList, currSelect, setIsSelected }) {
   const [checked, setChecked] = React.useState([0]);
 
   const handleToggle = (value) => () => {
@@ -23,6 +23,7 @@ export default function TaskList({ taskList }) {
     }
 
     setChecked(newChecked);
+    setIsSelected(!currSelect)
   };
 
   return (

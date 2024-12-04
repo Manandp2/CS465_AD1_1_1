@@ -69,7 +69,7 @@ export default function Home({setUser, setPage}) {
           </AccordionSummary>
           <AccordionDetails sx={{ paddingX: "0" }}>
             <Typography>
-              <TaskList taskList={unschedList} />
+              <TaskList taskList={unschedList} currSelect={isSelected} setIsSelected={setIsSelected} />
             </Typography>
           </AccordionDetails>
         </Accordion>
@@ -86,7 +86,8 @@ export default function Home({setUser, setPage}) {
       </Paper>
       
       <Topbar header={"CalenDone"} />
-      <Bottombar status={"Home"} setPage={setPage} />
+      {!isSelected && <Bottombar status={"Home"} setPage={setPage} />}
+      {isSelected && <Bottombar status={"Selected Home"} setPage={setPage} />}
     </div>
   );
 }
