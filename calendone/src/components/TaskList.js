@@ -24,7 +24,6 @@ export default function TaskList({ taskList, checked, setChecked }) {
 
     setChecked(newChecked);
     console.log(newChecked);
-    // setIsSelected(!currSelect)
   };
 
   return (
