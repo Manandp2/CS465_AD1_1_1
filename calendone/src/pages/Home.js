@@ -20,7 +20,7 @@ import { signOut } from "firebase/auth";
 import { Button } from "@mui/material";
 import { auth, db } from "../utils/firebase";
 import { doc, updateDoc, collection, setDoc } from "firebase/firestore";
-import AddModal from "../components/AddModal";
+import AddModal from "../components/AddDialog";
 
 function CustomTabPanel(props) {
   const { children, value, index, ...other } = props;
