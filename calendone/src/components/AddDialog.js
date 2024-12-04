@@ -13,16 +13,40 @@ import MenuItem from "@mui/material/MenuItem";
 import FormControl from "@mui/material/FormControl";
 import Select from "@mui/material/Select";
 import { Dialog, DialogActions, DialogContent, DialogTitle, Stack } from "@mui/material";
+import { auth, db } from "../utils/firebase";
+import { collection, doc, setDoc } from "firebase/firestore";
 
 export default function AddModal() {
   const [open, setOpen] = React.useState(false);
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
 
-  const [duration, setDuration] = React.useState("");
+  const [duration, setDuration] = React.useState(5);
+  const [dueDate, setDueDate] = React.useState(dayjs());
+  const [taskName, setTaskName] = React.useState("");
+  const [taskDescription, setTaskDescription] = React.useState("");
 
-  const handleChange = (event) => {
-    setDuration(event.target.value);
+
+  const addTodoToFirestore = () => {
+    const dueDateAsDate = dueDate.toDate();
+
+    const tasksCollectionRef = collection(db, "users", auth.currentUser.uid, "tasks");
+    const taskDocRef = doc(tasksCollectionRef);
+
+
+    setDoc(taskDocRef, {
+        name: taskName,
+        description: taskDescription,
+        dueDate: dueDateAsDate,
+        duration: Number(duration),
+        isComplete: false 
+      })
+      .then(() => {
+        console.log("Task added to Firestore");
+      })
+      .catch((error) => {
+        console.error("Error adding task: ", error);
+      });
   };
 
   return (
@@ -36,10 +60,7 @@ export default function AddModal() {
           component: "form",
           onSubmit: (event) => {
             event.preventDefault();
-            const formData = new FormData(event.currentTarget);
-            const formJson = Object.fromEntries(formData.entries());
-            const email = formJson.email;
-            console.log(email);
+            addTodoToFirestore();
             handleClose();
           },
         }}
@@ -64,9 +85,14 @@ export default function AddModal() {
         <DialogContent>
           <Stack spacing={3}>
             {/* Task Name */}
-            <TextField id="task-name" label="Task Name" variant="outlined" fullWidth />
+            <TextField id="task-name" label="Task Name" variant="outlined" fullWidth onChange={(e) => setTaskName(e.target.value)}/>
 
-            <MobileDateTimePicker label="Due Date" sx={{ width: "100%" }} />
+            <MobileDateTimePicker
+              label="Due Date"
+              value={dueDate}
+              onChange={(newValue) => setDueDate(newValue)}
+              sx={{ width: "100%" }}
+            />
             <Box>
               <FormControl fullWidth>
                 <InputLabel id="demo-simple-select-label">Duration</InputLabel>
@@ -75,7 +101,7 @@ export default function AddModal() {
                   id="demo-simple-select"
                   value={duration}
                   label="Duration"
-                  onChange={handleChange}
+                  onChange={(e) => setDuration(e.target.value)}
                 >
                   <MenuItem value={5}>5</MenuItem>
                   <MenuItem value={15}>15</MenuItem>
@@ -96,14 +122,15 @@ export default function AddModal() {
               rows={8}
               fullWidth
               sx={{ marginBottom: 2 }}
+              onChange={(e) => setTaskDescription(e.target.value)}
             />
           </Stack>
         </DialogContent>
 
         {/* </Paper> */}
         <DialogActions>
-          <Button>CANCEL</Button>
-          <Button>SUBMIT</Button>
+          <Button onClick={handleClose}>CANCEL</Button>
+          <Button type="submit">SUBMIT</Button>
         </DialogActions>
       </Dialog>
     </div>
