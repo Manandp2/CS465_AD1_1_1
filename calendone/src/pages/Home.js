@@ -1,4 +1,3 @@
-// import "./Home.css";
 import React from "react";
 import { useState } from "react";
 import PropTypes from "prop-types";
@@ -107,24 +106,11 @@ export default function Home() {
           right: 0,
         }}
       >
-        <Typography variant="h4">"CalenDone"</Typography>
+        <Typography variant="h4" sx={{ textAlign: "center" }}>
+          CalenDone
+        </Typography>
       </Paper>
-      {/* BOTTOM BAR */}
-      <Paper
-        square
-        elevation={3}
-        sx={{
-          backgroundColor: "#6d3b79",
-          color: "white",
-          paddingY: "3%",
-          position: "fixed",
-          bottom: "0",
-          left: 0,
-          right: 0,
-        }}
-      >
-        <Typography variant="h4">"Bottom Bar"</Typography>
-      </Paper>
+      <Bottombar />
     </div>
   );
 }
