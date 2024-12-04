@@ -43,7 +43,7 @@ function a11yProps(index) {
   };
 }
 
-export default function Home() {
+export default function Home({setUser, setPage}) {
   const [isSelected, setIsSelected] = useState(false);
   // const [activeTabIndex, setActiveTabIndex] = useState(0);
 
@@ -86,7 +86,7 @@ export default function Home() {
       </Paper>
       
       <Topbar header={"CalenDone"} />
-      <Bottombar status={"Home"} />
+      <Bottombar status={"Home"} setPage={setPage} />
     </div>
   );
 }

@@ -11,13 +11,22 @@ function App() {
   const [curPage, setCurPage] = useState("Home");
   if (curPage === "Home" && currentUser !== null) {
     console.log(currentUser);
-    return <Home setUser={setCurrentUser} />;
+    return <Home setUser={setCurrentUser} setPage={setCurPage} />;
   } if (curPage === "Completed") {
-    return <Completed />
+    return <Completed setUser={setCurrentUser} setPage={setCurPage} />
   } else {
     console.log(currentUser);
     return <SignIn setUser={setCurrentUser} />;
   }
+  // return (
+  //   <div>
+  //     {/* Material Design Icons import */}
+  //     <link
+  //       rel="stylesheet"
+  //       href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0"
+  //     />
+  //   </div>
+  // );
 }
 
 export default App;

@@ -11,7 +11,7 @@ import HomeIcon from '@mui/icons-material/Home';
 import RemoveDoneIcon from '@mui/icons-material/RemoveDone';
 import DeleteIcon from '@mui/icons-material/Delete';
 
-export default function Bottombar({status}) {
+export default function Bottombar({status, setPage}) {
   return (
     <Paper
       square
@@ -42,7 +42,7 @@ export default function Bottombar({status}) {
         <IconButton sx={{ color: "white" }}>
           <AddCircleOutlineIcon sx={{ fontSize: "170%" }} />
         </IconButton>
-        <IconButton sx={{ color: "white" }}>
+        <IconButton sx={{ color: "white" }} onClick={() => setPage("Completed")}>
           <ChecklistIcon sx={{ fontSize: "170%" }} />
         </IconButton>
       </Stack>}
@@ -61,7 +61,7 @@ export default function Bottombar({status}) {
         <IconButton disabled sx={{ color: "white" }}>
           <RemoveDoneIcon sx={{ fontSize: "170%" }} />
         </IconButton>
-        <IconButton sx={{ color: "white" }}>
+        <IconButton sx={{ color: "white" }} onClick={() => setPage("Home")}>
           <HomeIcon sx={{ fontSize: "170%" }} />
         </IconButton>
       </Stack>}

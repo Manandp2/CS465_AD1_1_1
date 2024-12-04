@@ -43,7 +43,7 @@ function a11yProps(index) {
   };
 }
 
-export default function Completed() {
+export default function Completed({setUser, setPage}) {
   const [isSelected, setIsSelected] = useState(false);
   // const [activeTabIndex, setActiveTabIndex] = useState(0);
 
@@ -54,24 +54,24 @@ export default function Completed() {
 
   return (
     <div>
-      <Paper square elevation={3} sx={{ backgroundColor: "white", color: "white", paddingY: "3%" }}>
-        <Typography variant="h4">PLACEHOLDER</Typography>
-      </Paper>
-      <Paper sx={{ overflowY: "scroll" }}>
-      <Accordion disableGutters defaultExpanded>
-          <AccordionSummary expandIcon={<ArrowDropDownIcon />} aria-controls="panel1-content" id="panel1-header">
-            <Typography>Completed Tasks</Typography>
-          </AccordionSummary>
-          <AccordionDetails sx={{ paddingX: "0" }}>
-            <Typography>
-              <TaskList taskList={completedList} />
-            </Typography>
-          </AccordionDetails>
-        </Accordion>
-      </Paper>
+        <Paper square elevation={3} sx={{ backgroundColor: "white", color: "white", paddingY: "3%" }}>
+            <Typography variant="h4">PLACEHOLDER</Typography>
+        </Paper>
+        <Paper sx={{ overflowY: "scroll" }}>
+        <Accordion disableGutters defaultExpanded>
+            <AccordionSummary expandIcon={<ArrowDropDownIcon />} aria-controls="panel1-content" id="panel1-header">
+                <Typography>Completed Tasks</Typography>
+            </AccordionSummary>
+            <AccordionDetails sx={{ paddingX: "0" }}>
+                <Typography>
+                <TaskList taskList={completedList} />
+                </Typography>
+            </AccordionDetails>
+            </Accordion>
+        </Paper>
 
-      <Topbar header={"CalenDone"} />
-      <Bottombar status={"Completed"} />
+        <Topbar header={"CalenDone"} />
+        <Bottombar status={"Completed"} setPage={setPage} />
     </div>
   );
 }
