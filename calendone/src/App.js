@@ -19,10 +19,8 @@ function App() {
   }, []);
 
   if (curPage === "Home" && currentUser !== null) {
-    console.log(currentUser);
     return <Home setUser={setCurrentUser} />;
   } else {
-    console.log(currentUser);
     return <SignIn setUser={setCurrentUser} />;
   }
 }
