@@ -65,11 +65,11 @@ export default function Home({ setUser, setPage }) {
   const [scheduledTasks, setScheduledTasks] = useState([]);
 
   const getTasks = () => {
-    setUnscheduledTasks([]);
-    setScheduledTasks([]);
     const tasksCollectionRef = collection(db, "users", auth.currentUser.uid, "tasks");
     getDocs(tasksCollectionRef)
     .then((querySnapshot) => {
+      setUnscheduledTasks([]);
+      setScheduledTasks([]);
       querySnapshot.forEach((doc) => {
         const task = doc.data();
         if (task.isComplete) {
