@@ -1,7 +1,5 @@
-import React, {useEffect} from "react";
+import React, { useEffect } from "react";
 import { useState } from "react";
-import PropTypes from "prop-types";
-import Box from "@mui/material/Box";
 
 import Bottombar from "../components/Bottombar";
 import TaskList from "../components/TaskList";
@@ -18,35 +16,6 @@ import { Button } from "@mui/material";
 import { auth, db } from "../utils/firebase";
 import { collection, getDocs } from "firebase/firestore";
 
-function CustomTabPanel(props) {
-  const { children, value, index, ...other } = props;
-
-  return (
-    <div
-      role="tabpanel"
-      hidden={value !== index}
-      id={`simple-tabpanel-${index}`}
-      aria-labelledby={`simple-tab-${index}`}
-      {...other}
-    >
-      {value === index && <Box sx={{ p: 3 }}>{children}</Box>}
-    </div>
-  );
-}
-
-CustomTabPanel.propTypes = {
-  children: PropTypes.node,
-  index: PropTypes.number.isRequired,
-  value: PropTypes.number.isRequired,
-};
-
-function a11yProps(index) {
-  return {
-    id: `simple-tab-${index}`,
-    "aria-controls": `simple-tabpanel-${index}`,
-  };
-}
-
 export default function Home({ setUser, setPage }) {
   const SignOut = () => {
     signOut(auth)
@@ -58,38 +27,51 @@ export default function Home({ setUser, setPage }) {
         console.log(error);
       });
   };
-  const [isSelected, setIsSelected] = useState(false);
-  // const [activeTabIndex, setActiveTabIndex] = useState(0);
 
   const [unscheduledTasks, setUnscheduledTasks] = useState([]);
   const [scheduledTasks, setScheduledTasks] = useState([]);
+  const [bottomBarStatus, setBottomBarStatus] = useState("Home");
+  const [unschedChecked, setUnschedChecked] = React.useState([]);
+  const [schedChecked, setSchedChecked] = React.useState([]);
 
   const getTasks = () => {
     const tasksCollectionRef = collection(db, "users", auth.currentUser.uid, "tasks");
     getDocs(tasksCollectionRef)
-    .then((querySnapshot) => {
-      setUnscheduledTasks([]);
-      setScheduledTasks([]);
-      querySnapshot.forEach((doc) => {
-        const task = doc.data();
-        if (task.isComplete) {
-          setScheduledTasks((prev) => [...prev, task.name]);
-        } else {
-          setUnscheduledTasks((prev) => [...prev, task.name]);
-        }
+      .then((querySnapshot) => {
+        setUnscheduledTasks([]);
+        setScheduledTasks([]);
+        querySnapshot.forEach((doc) => {
+          const task = doc.data();
+          if (task.isScheduled) {
+            setScheduledTasks((prev) => [...prev, task.name]);
+          } else {
+            setUnscheduledTasks((prev) => [...prev, task.name]);
+          }
+        });
+      })
+      .catch((error) => {
+        console.log(error);
       });
-    })
-    .catch((error) => {
-      console.log(error);
-    });
-  }
+  };
 
   useEffect(() => {
     getTasks();
-  }, [])
+  }, []);
 
-  const [unschedChecked, setUnschedChecked] = React.useState([]);
-  const [schedChecked, setSchedChecked] = React.useState([]);
+  useEffect(() => {
+    const sLen = schedChecked.length;
+    const uLen = unschedChecked.length;
+    if (sLen === 0 && uLen === 0) {
+      setBottomBarStatus("Home");
+    } else if (sLen === 0) {
+      setBottomBarStatus("HomeUnscheduled");
+    } else if (uLen === 0) {
+      setBottomBarStatus("HomeScheduled");
+    } else {
+      setBottomBarStatus("HomeMixed");
+    }
+    // console.log("BRUH", sLen, uLen);
+  }, [schedChecked, unschedChecked]);
 
   return (
     <div>
@@ -138,11 +120,12 @@ export default function Home({ setUser, setPage }) {
           CalenDone
         </Typography>
       </Paper>
-      {unschedChecked.length === 0 && schedChecked.length === 0 ? (
+      {/* {unschedChecked.length === 0 && schedChecked.length === 0 ? (
         <Bottombar status={"Home"} setPage={setPage} getTasks={getTasks} />
       ) : (
         <Bottombar status={"Selected Home"} setPage={setPage} />
-      )}
+      )} */}
+      <Bottombar status={bottomBarStatus} setPage={setPage} getTasks={getTasks} />
     </div>
   );
 }

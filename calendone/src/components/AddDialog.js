@@ -13,7 +13,7 @@ import { auth, db } from "../utils/firebase";
 import { collection, doc, setDoc } from "firebase/firestore";
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 
-export default function AddDialog({getTasks}) {
+export default function AddDialog({ getTasks }) {
   const [open, setOpen] = React.useState(false);
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
@@ -49,7 +49,7 @@ export default function AddDialog({getTasks}) {
   return (
     <div>
       <IconButton onClick={handleOpen} sx={{ color: "white" }}>
-        <AddCircleOutlineIcon sx={{ fontSize: "170%" }} />
+        <AddCircleOutlineIcon sx={{ fontSize: "250%" }} />
       </IconButton>
       <Dialog
         fullWidth
