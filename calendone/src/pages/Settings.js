@@ -1,25 +1,20 @@
 import React from "react";
-import { useState } from "react";
-import PropTypes from "prop-types";
 import Box from "@mui/material/Box";
 
 import Topbar from "../components/Topbar";
 import Bottombar from "../components/Bottombar";
-import BreakAddDialog from "../components/BreakAddDialog";
-import BreakEditDialog from "../components/BreakEditDialog";
 
 import Accordion from "@mui/material/Accordion";
 import AccordionSummary from "@mui/material/AccordionSummary";
 import AccordionDetails from "@mui/material/AccordionDetails";
 import Typography from "@mui/material/Typography";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
-import List from "@mui/material/List";
-import ListItem from "@mui/material/ListItem";
-import ListItemText from "@mui/material/ListItemText";
-import { CssBaseline, IconButton, Paper } from "@mui/material";
+import Paper from "@mui/material/Paper";
 
-import EditIcon from "@mui/icons-material/Edit";
-import DeleteIcon from "@mui/icons-material/Delete"
+import dayjs from 'dayjs';
+import { TimePicker } from '@mui/x-date-pickers/TimePicker';
+import FormControl from '@mui/material/FormControl';
+
 import LogoutIcon from '@mui/icons-material/Logout';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 
@@ -28,47 +23,52 @@ import { Button } from "@mui/material";
 import { auth, db } from "../utils/firebase";
 import { doc, updateDoc, collection, setDoc } from "firebase/firestore";
 
-function BreakList({ breakList, setBreakList }) {
-  const deleteBreak = (valueToDelete) => {
-    setBreakList((prevList) => prevList.filter(item => item !== valueToDelete));
-  };
+function WorkTimesAccordion({workTime, setWorkTime}) {
+    const [startTime, setStartTime] = React.useState(workTime.startTime);
+    const [endTime, setEndTime] = React.useState(workTime.endTime);
 
-  return (
-    <List sx={{ width: "100%", bgcolor: "background.paper" }}>
-      {breakList.map((value) => {
-        const labelId = `checkbox-list-label-${value}`;
-        return (
-            <ListItem 
-                key={value}
-                secondaryAction={
-                <Box edge="end">
-                    <BreakEditDialog itemToEdit={value} breakList={breakList} setBreakList={setBreakList} />
-                    <IconButton onClick={() => deleteBreak(value)}>
-                        <DeleteIcon />
-                    </IconButton>
-                </Box>
-                }
-                dense
-            >
-                <ListItemText 
-                    primary={value.name}
-                    secondary={value.startTime.format('hh:mmA') + " - " + value.endTime.format('hh:mmA')} />
-            </ListItem>
-        );
-      })}
-    </List>
-  );
-}
+    const saveChanges = () => {
+        setWorkTime({startTime: startTime, endTime: endTime});
+    }
 
-function BreaksAccordion({breakList, setBreakList}) {
     return (
         <Accordion disableGutters defaultExpanded>
             <AccordionSummary expandIcon={<ArrowDropDownIcon />} aria-controls="panel1-1-content" id="panel1-1-header">
-                <Typography>Breaks</Typography>
+                <Typography sx={{ width: '33%', flexShrink: 0 }}>
+                    Work Time
+                </Typography>
+                <Typography sx={{ color: 'text.secondary' }}>
+                    {workTime.startTime.format('h:mmA') + " - " + workTime.endTime.format('h:mmA')}
+                </Typography>
             </AccordionSummary>
             <AccordionDetails sx={{textAlign: "center"}}>
-                <BreakAddDialog setBreakList={setBreakList} />
-                <BreakList breakList={breakList} setBreakList={setBreakList} />
+                <Box component="form" sx={{ display: 'flex', flexWrap: 'wrap' }}>
+                    <FormControl sx={{ m: 1, minWidth: 120 }}>
+                        <TimePicker 
+                            label="Start Time"
+                            defaultValue={workTime.startTime}
+                            onChange={(value) => setStartTime(value)}
+                            maxTime={endTime}
+                        />
+                    </FormControl>
+                    <FormControl sx={{ m: 1, minWidth: 120 }}>
+                        <TimePicker 
+                            label="End Time" 
+                            defaultValue={workTime.endTime}
+                            onChange={(value) => setEndTime(value)}
+                            minTime={startTime}
+                        />
+                    </FormControl>
+                    <FormControl sx={{ m: 1, minWidth: 120 }}>
+                        <Button 
+                            variant="contained"
+                            sx={{textTransform: "None", backgroundColor: "#6d3b79"}}
+                            onClick={saveChanges}
+                        >
+                            <Typography>Save Changes</Typography>
+                        </Button>
+                    </FormControl>
+                </Box>
             </AccordionDetails>
         </Accordion>
     )
@@ -141,10 +141,14 @@ export default function Settings({ setUser, setPage }) {
     };
 
     // Contains:
-    // Name: string
     // startDate: dayjs
     // endDate: dayjs
-    const [breakList, setBreakList] = React.useState([]);
+    const [workTime, setWorkTime] = React.useState(
+        {
+            startTime: dayjs('2024-12-06T8:00'),
+            endTime: dayjs('2024-12-06T18:00')
+        }
+    );
 
     return (
         <div>
@@ -157,7 +161,7 @@ export default function Settings({ setUser, setPage }) {
                 <Typography>Preferences</Typography>
             </AccordionSummary>
             <AccordionDetails>
-                <BreaksAccordion breakList={breakList} setBreakList={setBreakList} />
+                <WorkTimesAccordion workTime={workTime} setWorkTime={setWorkTime} />
             </AccordionDetails>
             </Accordion>
 
