@@ -41,7 +41,7 @@ export default function Bottombar({ status, setPage, getTasks }) {
           }}
         >
           <IconButton sx={{ color: "white" }}>
-            <SettingsIcon sx={{ fontSize: "170%" }} />
+            <SettingsIcon sx={{ fontSize: "170%" }} onClick={() => setPage("Settings")} />
           </IconButton>
           <AddDialog getTasks={getTasks} />
           <IconButton sx={{ color: "white" }} onClick={() => setPage("Completed")}>
@@ -104,6 +104,20 @@ export default function Bottombar({ status, setPage, getTasks }) {
           <IconButton sx={{ color: "white" }}>
             <RemoveDoneIcon sx={{ fontSize: "170%" }} />
           </IconButton>
+          <IconButton sx={{ color: "white" }} onClick={() => setPage("Home")}>
+            <HomeIcon sx={{ fontSize: "170%" }} />
+          </IconButton>
+        </Stack>
+      )}
+      {status == "Settings" && (
+        <Stack
+          direction="row"
+          spacing={0}
+          sx={{
+            justifyContent: "space-around",
+            alignItems: "center",
+          }}
+        >
           <IconButton sx={{ color: "white" }} onClick={() => setPage("Home")}>
             <HomeIcon sx={{ fontSize: "170%" }} />
           </IconButton>

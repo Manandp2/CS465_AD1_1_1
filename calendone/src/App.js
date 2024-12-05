@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import Home from "./pages/Home";
-// import Settings from './pages/settings/Settings';
+import Settings from './pages/Settings';
 import { auth } from "./utils/firebase";
 import SignIn from "./pages/SignIn";
 import { onAuthStateChanged } from "firebase/auth";
@@ -33,6 +33,13 @@ function App() {
     return (
       <LocalizationProvider dateAdapter={AdapterDayjs}>
         <Completed setUser={setCurrentUser} setPage={setCurPage} />
+      </LocalizationProvider>
+    );
+  } else if (curPage === "Settings" && currentUser !== null) {
+    console.log(currentUser);
+    return (
+      <LocalizationProvider dateAdapter={AdapterDayjs}>
+        <Settings setUser={setCurrentUser} setPage={setCurPage} />
       </LocalizationProvider>
     );
   } else {
