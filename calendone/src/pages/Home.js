@@ -1,9 +1,8 @@
-import React from "react";
+import React, {useEffect} from "react";
 import { useState } from "react";
 import PropTypes from "prop-types";
 import Box from "@mui/material/Box";
 
-import Topbar from "../components/Topbar";
 import Bottombar from "../components/Bottombar";
 import TaskList from "../components/TaskList";
 
@@ -12,12 +11,12 @@ import AccordionSummary from "@mui/material/AccordionSummary";
 import AccordionDetails from "@mui/material/AccordionDetails";
 import Typography from "@mui/material/Typography";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
-import { CssBaseline, Paper } from "@mui/material";
+import { Paper } from "@mui/material";
 
 import { signOut } from "firebase/auth";
 import { Button } from "@mui/material";
 import { auth, db } from "../utils/firebase";
-import { doc, updateDoc, collection, setDoc } from "firebase/firestore";
+import { collection, getDocs } from "firebase/firestore";
 
 function CustomTabPanel(props) {
   const { children, value, index, ...other } = props;
@@ -49,17 +48,6 @@ function a11yProps(index) {
 }
 
 export default function Home({ setUser, setPage }) {
-  const addTodoToFirestore = () => {
-    const tasksCollectionRef = collection(db, "users", auth.currentUser.uid, "tasks");
-    const taskDocRef = doc(tasksCollectionRef);
-    setDoc(taskDocRef, { name: "Task 1", description: "Description 1", dueDate: "2022-12-31", isComplete: false })
-      .then(() => {
-        console.log("Task added to Firestore");
-      })
-      .catch((error) => {
-        console.log(error);
-      });
-  };
   const SignOut = () => {
     signOut(auth)
       .then(() => {
@@ -73,17 +61,33 @@ export default function Home({ setUser, setPage }) {
   const [isSelected, setIsSelected] = useState(false);
   // const [activeTabIndex, setActiveTabIndex] = useState(0);
 
-  const unschedList = [];
-  for (let i = 0; i < 5; i++) {
-    unschedList.push("Unscheduled Task " + i);
+  const [unscheduledTasks, setUnscheduledTasks] = useState([]);
+  const [scheduledTasks, setScheduledTasks] = useState([]);
+
+  const getTasks = () => {
+    setUnscheduledTasks([]);
+    setScheduledTasks([]);
+    const tasksCollectionRef = collection(db, "users", auth.currentUser.uid, "tasks");
+    getDocs(tasksCollectionRef)
+    .then((querySnapshot) => {
+      querySnapshot.forEach((doc) => {
+        const task = doc.data();
+        if (task.isComplete) {
+          setScheduledTasks((prev) => [...prev, task.name]);
+        } else {
+          setUnscheduledTasks((prev) => [...prev, task.name]);
+        }
+      });
+    })
+    .catch((error) => {
+      console.log(error);
+    });
   }
 
-  const schedList = [];
-  for (let i = 0; i < 10; i++) {
-    schedList.push("Scheduled Task " + i);
-  }
+  useEffect(() => {
+    getTasks();
+  }, [])
 
-  // const [checkedUnsched, setCheckedUnsched] = React.useState([0]);
   const [unschedChecked, setUnschedChecked] = React.useState([]);
   const [schedChecked, setSchedChecked] = React.useState([]);
 
@@ -94,14 +98,13 @@ export default function Home({ setUser, setPage }) {
       </Paper>
       <Paper sx={{ overflowY: "scroll" }}>
         <Button onClick={SignOut}>Sign Out</Button>
-        <Button onClick={addTodoToFirestore}>Add Todo</Button>
         <Accordion disableGutters>
           <AccordionSummary expandIcon={<ArrowDropDownIcon />} aria-controls="panel1-content" id="panel1-header">
             <Typography>Unscheduled Tasks</Typography>
           </AccordionSummary>
           <AccordionDetails sx={{ paddingX: "0" }}>
             <Typography>
-              <TaskList taskList={unschedList} checked={unschedChecked} setChecked={setUnschedChecked} />
+              <TaskList taskList={unscheduledTasks} checked={unschedChecked} setChecked={setUnschedChecked} />
             </Typography>
           </AccordionDetails>
         </Accordion>
@@ -111,7 +114,7 @@ export default function Home({ setUser, setPage }) {
           </AccordionSummary>
           <AccordionDetails sx={{ paddingX: "0" }}>
             <Typography>
-              <TaskList taskList={schedList} checked={schedChecked} setChecked={setSchedChecked} />
+              <TaskList taskList={scheduledTasks} checked={schedChecked} setChecked={setSchedChecked} />
             </Typography>
           </AccordionDetails>
         </Accordion>
