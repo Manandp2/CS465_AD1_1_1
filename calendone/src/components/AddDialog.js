@@ -12,11 +12,12 @@ import InputLabel from "@mui/material/InputLabel";
 import MenuItem from "@mui/material/MenuItem";
 import FormControl from "@mui/material/FormControl";
 import Select from "@mui/material/Select";
-import { Dialog, DialogActions, DialogContent, DialogTitle, Stack } from "@mui/material";
+import { Dialog, DialogActions, DialogContent, DialogTitle, IconButton, Stack } from "@mui/material";
 import { auth, db } from "../utils/firebase";
 import { collection, doc, setDoc } from "firebase/firestore";
+import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 
-export default function AddModal() {
+export default function AddDialog() {
   const [open, setOpen] = React.useState(false);
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
@@ -26,21 +27,19 @@ export default function AddModal() {
   const [taskName, setTaskName] = React.useState("");
   const [taskDescription, setTaskDescription] = React.useState("");
 
-
   const addTodoToFirestore = () => {
     const dueDateAsDate = dueDate.toDate();
 
     const tasksCollectionRef = collection(db, "users", auth.currentUser.uid, "tasks");
     const taskDocRef = doc(tasksCollectionRef);
 
-
     setDoc(taskDocRef, {
-        name: taskName,
-        description: taskDescription,
-        dueDate: dueDateAsDate,
-        duration: Number(duration),
-        isComplete: false 
-      })
+      name: taskName,
+      description: taskDescription,
+      dueDate: dueDateAsDate,
+      duration: Number(duration),
+      isComplete: false,
+    })
       .then(() => {
         console.log("Task added to Firestore");
       })
@@ -51,7 +50,9 @@ export default function AddModal() {
 
   return (
     <div>
-      <Button onClick={handleOpen}>Open modal</Button>
+      <IconButton onClick={handleOpen} sx={{ color: "white" }}>
+        <AddCircleOutlineIcon sx={{ fontSize: "170%" }} />
+      </IconButton>
       <Dialog
         fullWidth
         open={open}
@@ -85,7 +86,13 @@ export default function AddModal() {
         <DialogContent>
           <Stack spacing={3}>
             {/* Task Name */}
-            <TextField id="task-name" label="Task Name" variant="outlined" fullWidth onChange={(e) => setTaskName(e.target.value)}/>
+            <TextField
+              id="task-name"
+              label="Task Name"
+              variant="outlined"
+              fullWidth
+              onChange={(e) => setTaskName(e.target.value)}
+            />
 
             <MobileDateTimePicker
               label="Due Date"
