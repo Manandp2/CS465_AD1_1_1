@@ -4,7 +4,6 @@ import { Paper, Stack, IconButton } from "@mui/material";
 
 // Icons
 import SettingsIcon from "@mui/icons-material/Settings";
-import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import ChecklistIcon from "@mui/icons-material/Checklist";
 import DoneAllIcon from "@mui/icons-material/DoneAll";
 
@@ -16,7 +15,7 @@ import RemoveDoneIcon from "@mui/icons-material/RemoveDone";
 import DeleteIcon from "@mui/icons-material/Delete";
 import AddDialog from "../components/AddDialog";
 
-export default function Bottombar({ status, setPage }) {
+export default function Bottombar({ status, setPage, getTasks }) {
   return (
     <Paper
       square
@@ -32,7 +31,7 @@ export default function Bottombar({ status, setPage }) {
         textAlign: "center",
       }}
     >
-      {status == "Home" && (
+      {status === "Home" && (
         <Stack
           direction="row"
           spacing={0}
@@ -44,13 +43,13 @@ export default function Bottombar({ status, setPage }) {
           <IconButton sx={{ color: "white" }}>
             <SettingsIcon sx={{ fontSize: "170%" }} />
           </IconButton>
-          <AddDialog />
+          <AddDialog getTasks={getTasks} />
           <IconButton sx={{ color: "white" }} onClick={() => setPage("Completed")}>
             <ChecklistIcon sx={{ fontSize: "170%" }} />
           </IconButton>
         </Stack>
       )}
-      {status == "Selected Home" && (
+      {status === "Selected Home" && (
         <Stack
           direction="row"
           spacing={0}
@@ -70,7 +69,7 @@ export default function Bottombar({ status, setPage }) {
           </IconButton>
         </Stack>
       )}
-      {status == "Completed" && (
+      {status === "Completed" && (
         <Stack
           direction="row"
           spacing={0}
@@ -90,7 +89,7 @@ export default function Bottombar({ status, setPage }) {
           </IconButton>
         </Stack>
       )}
-      {status == "Selected Completed" && (
+      {status === "Selected Completed" && (
         <Stack
           direction="row"
           spacing={0}

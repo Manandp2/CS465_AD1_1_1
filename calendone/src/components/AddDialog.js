@@ -13,7 +13,7 @@ import { auth, db } from "../utils/firebase";
 import { collection, doc, setDoc } from "firebase/firestore";
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 
-export default function AddDialog() {
+export default function AddDialog({getTasks}) {
   const [open, setOpen] = React.useState(false);
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
@@ -39,6 +39,7 @@ export default function AddDialog() {
     })
       .then(() => {
         console.log("Task added to Firestore");
+        getTasks();
       })
       .catch((error) => {
         console.error("Error adding task: ", error);

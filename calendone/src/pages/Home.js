@@ -139,7 +139,7 @@ export default function Home({ setUser, setPage }) {
         </Typography>
       </Paper>
       {unschedChecked.length === 0 && schedChecked.length === 0 ? (
-        <Bottombar status={"Home"} setPage={setPage} />
+        <Bottombar status={"Home"} setPage={setPage} getTasks={getTasks} />
       ) : (
         <Bottombar status={"Selected Home"} setPage={setPage} />
       )}
