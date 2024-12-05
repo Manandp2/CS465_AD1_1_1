@@ -49,14 +49,14 @@ export default function RecapModal({ open, onClose }) {
         {/* Title */}
         <Typography
           variant="h6"
-          sx={{ marginBottom: 1, textAlign: "center", fontSize: '18px'}}
+          sx={{ marginBottom: 1, textAlign: "center"}}
           id="recap-modal-title"
         >
-          Overdue Tasks Recap
+          Overdue Recap
         </Typography>
         <Typography variant="body1"
-          sx={{ marginBottom: 3, textAlign: "center", fontSize: '12px' }}>
-              Select incomplete tasks to send back to to-do list
+          sx={{ marginBottom: 3, textAlign: "center", fontSize: '10px' }}>
+              Select incomplete tasks to reschedule
         </Typography>
 
         {/* Task List */}
