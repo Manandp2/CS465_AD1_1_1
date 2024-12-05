@@ -1,13 +1,9 @@
 import React from "react";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
-import Typography from "@mui/material/Typography";
-import Modal from "@mui/material/Modal";
-import Paper from "@mui/material/Paper";
 import TextField from "@mui/material/TextField";
 import dayjs from "dayjs";
 import { MobileDateTimePicker } from "@mui/x-date-pickers/MobileDateTimePicker";
-import { DateTimePicker } from "@mui/x-date-pickers";
 import InputLabel from "@mui/material/InputLabel";
 import MenuItem from "@mui/material/MenuItem";
 import FormControl from "@mui/material/FormControl";
@@ -39,6 +35,7 @@ export default function AddDialog() {
       dueDate: dueDateAsDate,
       duration: Number(duration),
       isComplete: false,
+      isScheduled: false,
     })
       .then(() => {
         console.log("Task added to Firestore");
