@@ -1,41 +1,91 @@
-import React from "react";
-import { Modal, Paper, Typography, List, ListItem, Checkbox, Button } from "@mui/material";
-
-const style = {
-  position: "absolute",
-  top: "50%",
-  left: "50%",
-  transform: "translate(-50%, -50%)",
-  width: "70%",
-  padding: "16px",
-  textAlign: "center",
-};
+import React, { useState } from "react";
+import {
+  Modal,
+  Paper,
+  Typography,
+  FormGroup,
+  FormControlLabel,
+  Checkbox,
+  Button,
+  Stack,
+} from "@mui/material";
 
 export default function RecapModal({ open, onClose }) {
-  const tasks = [
-    { id: 1, name: "Task 1", completed: false },
-    { id: 2, name: "Task 2", completed: false },
-    { id: 3, name: "Task 3", completed: false },
-    { id: 4, name: "Task 4", completed: false },
-  ];
+  // Default tasks
+  const [tasks, setTasks] = useState([
+    { id: 1, name: "Task 1", selected: false },
+    { id: 2, name: "Task 2", selected: false },
+    { id: 3, name: "Task 3", selected: false },
+    { id: 4, name: "Task 4", selected: false },
+  ]);
+
+  // Toggle task selection
+  const toggleTaskSelection = (taskId) => {
+    setTasks((prevTasks) =>
+      prevTasks.map((task) =>
+        task.id === taskId ? { ...task, selected: !task.selected } : task
+      )
+    );
+  };
 
   return (
-    <Modal open={open} onClose={onClose}>
-      <Paper elevation={3} sx={style}>
-        <Typography variant="h6" sx={{ marginBottom: 3 }}>
+    <Modal
+      open={open}
+      onClose={onClose}
+      aria-labelledby="recap-modal-title"
+      aria-describedby="recap-modal-description"
+    >
+      <Paper
+        elevation={3}
+        sx={{
+          position: "absolute",
+          top: "50%",
+          left: "50%",
+          transform: "translate(-50%, -50%)",
+          width: "50%",
+          padding: 4,
+        }}
+      >
+        {/* Title */}
+        <Typography
+          variant="h6"
+          sx={{ marginBottom: 3, textAlign: "center" }}
+          id="recap-modal-title"
+        >
           Completed Tasks Recap
         </Typography>
-        <List>
+        <Typography variant="body1"
+          sx={{ marginBottom: 3, textAlign: "center" }}>
+              Select incomplete tasks to send back to your to-do list!
+        </Typography>
+
+        {/* Task List */}
+        <FormGroup>
           {tasks.map((task) => (
-            <ListItem key={task.id}>
-              <Checkbox checked={task.completed} />
-              {task.name}
-            </ListItem>
+            <FormControlLabel
+              key={task.id}
+              control={
+                <Checkbox
+                  checked={task.selected}
+                  onChange={() => toggleTaskSelection(task.id)}
+                />
+              }
+              label={task.name}
+            />
           ))}
-        </List>
-        <Button variant="contained" sx={{ marginTop: 3 }} onClick={onClose}>
-          Done
-        </Button>
+        </FormGroup>
+
+        {/* Footer Buttons */}
+        <Stack
+          direction="row"
+          spacing={2}
+          justifyContent="center"
+          sx={{ marginTop: 4 }}
+        >
+          <Button variant="contained" color="primary" onClick={onClose}>
+            Done
+          </Button>
+        </Stack>
       </Paper>
     </Modal>
   );
