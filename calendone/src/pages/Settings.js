@@ -5,21 +5,115 @@ import Box from "@mui/material/Box";
 
 import Topbar from "../components/Topbar";
 import Bottombar from "../components/Bottombar";
-import LogoutIcon from '@mui/icons-material/Logout';
-import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
+import BreakAddDialog from "../components/BreakAddDialog";
+import BreakEditDialog from "../components/BreakEditDialog";
 
 import Accordion from "@mui/material/Accordion";
 import AccordionSummary from "@mui/material/AccordionSummary";
 import AccordionDetails from "@mui/material/AccordionDetails";
 import Typography from "@mui/material/Typography";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
-import AddIcon from '@mui/icons-material/Add';
+import List from "@mui/material/List";
+import ListItem from "@mui/material/ListItem";
+import ListItemText from "@mui/material/ListItemText";
 import { CssBaseline, IconButton, Paper } from "@mui/material";
+
+import EditIcon from "@mui/icons-material/Edit";
+import DeleteIcon from "@mui/icons-material/Delete"
+import LogoutIcon from '@mui/icons-material/Logout';
+import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 
 import { signOut } from "firebase/auth";
 import { Button } from "@mui/material";
 import { auth, db } from "../utils/firebase";
 import { doc, updateDoc, collection, setDoc } from "firebase/firestore";
+
+function BreakList({ breakList, setBreakList }) {
+  const deleteBreak = (valueToDelete) => {
+    setBreakList((prevList) => prevList.filter(item => item !== valueToDelete));
+  };
+
+  return (
+    <List sx={{ width: "100%", bgcolor: "background.paper" }}>
+      {breakList.map((value) => {
+        const labelId = `checkbox-list-label-${value}`;
+        return (
+            <ListItem 
+                key={value}
+                secondaryAction={
+                <Box edge="end">
+                    <BreakEditDialog itemToEdit={value} breakList={breakList} setBreakList={setBreakList} />
+                    <IconButton onClick={() => deleteBreak(value)}>
+                        <DeleteIcon />
+                    </IconButton>
+                </Box>
+                }
+                dense
+            >
+                <ListItemText 
+                    primary={value}
+                    secondary={"Insert break times here"} />
+            </ListItem>
+        );
+      })}
+    </List>
+  );
+}
+
+function BreaksAccordion({breakList, setBreakList}) {
+    return (
+        <Accordion disableGutters defaultExpanded>
+            <AccordionSummary expandIcon={<ArrowDropDownIcon />} aria-controls="panel1-1-content" id="panel1-1-header">
+                <Typography>Breaks</Typography>
+            </AccordionSummary>
+            <AccordionDetails sx={{textAlign: "center"}}>
+                <BreakAddDialog setBreakList={setBreakList} />
+                <BreakList breakList={breakList} setBreakList={setBreakList} />
+            </AccordionDetails>
+        </Accordion>
+    )
+}
+
+function GoogleAccordion() {
+    return (
+        <Accordion disableGutters defaultExpanded>
+            <AccordionSummary expandIcon={<ArrowDropDownIcon />} aria-controls="panel2-content" id="panel2-header">
+                <Typography>Google</Typography>
+            </AccordionSummary>
+            <AccordionDetails>
+                <Button 
+                    href="https://calendar.google.com" 
+                    target="_blank" 
+                    startIcon={<CalendarTodayIcon />}
+                    color="primary"
+                    sx={{ textTransform: "None", color: "#6d3b79"}}
+                >
+                    <Typography>Google Calendar</Typography>
+                </Button>
+            </AccordionDetails>
+        </Accordion>
+    )
+}
+
+function AccountAccordion({SignOut}) {
+    return (
+        <Accordion disableGutters defaultExpanded>
+            <AccordionSummary expandIcon={<ArrowDropDownIcon />} aria-controls="panel3-content" id="panel3-header">
+                <Typography>Account</Typography>
+            </AccordionSummary>
+            <AccordionDetails>
+                <Button 
+                    onClick={SignOut} 
+                    startIcon={<LogoutIcon />}
+                    color="primary"
+                    sx={{ textTransform: "None", color: "#6d3b79"}}
+                >
+                    <Typography>Sign Out</Typography>
+                </Button>
+            </AccordionDetails>
+        </Accordion>
+    )
+}
 
 export default function Settings({ setUser, setPage }) {
     // const [activeTabIndex, setActiveTabIndex] = useState(0);
@@ -46,6 +140,8 @@ export default function Settings({ setUser, setPage }) {
         });
     };
 
+    const [breakList, setBreakList] = React.useState([]);
+
     return (
         <div>
         <Paper square elevation={3} sx={{ backgroundColor: "white", color: "white", paddingY: "3%" }}>
@@ -57,64 +153,12 @@ export default function Settings({ setUser, setPage }) {
                 <Typography>Preferences</Typography>
             </AccordionSummary>
             <AccordionDetails>
-                <Accordion disableGutters>
-                <AccordionSummary expandIcon={<ArrowDropDownIcon />} aria-controls="panel1-1-content" id="panel1-1-header">
-                    <Typography>Breaks</Typography>
-                </AccordionSummary>
-                    <AccordionDetails>
-                        <Button 
-                            variant="contained"
-                            startIcon={<AddIcon />}
-                            sx={{textTransform: "None", backgroundColor: "#6d3b79"}}
-                        >
-                            <Typography>Add Break</Typography>
-                        </Button>
-                    </AccordionDetails>
-                </Accordion>
-
-                {/* <Accordion disableGutters>
-                <AccordionSummary expandIcon={<ArrowDropDownIcon />} aria-controls="panel1-2-content" id="panel1-2-header">
-                    <Typography>Time limit per session</Typography>
-                </AccordionSummary>
-                    <AccordionDetails>
-                        
-                    </AccordionDetails>
-                </Accordion> */}
+                <BreaksAccordion breakList={breakList} setBreakList={setBreakList} />
             </AccordionDetails>
             </Accordion>
 
-            <Accordion disableGutters>
-            <AccordionSummary expandIcon={<ArrowDropDownIcon />} aria-controls="panel2-content" id="panel2-header">
-                <Typography>Google</Typography>
-            </AccordionSummary>
-            <AccordionDetails>
-                <Button 
-                    href="https://calendar.google.com" 
-                    target="_blank" 
-                    startIcon={<CalendarTodayIcon />}
-                    color="primary"
-                    sx={{ textTransform: "None", color: "#6d3b79"}}
-                >
-                    <Typography>Google Calendar</Typography>
-                </Button>
-            </AccordionDetails>
-            </Accordion>
-
-            <Accordion disableGutters>
-            <AccordionSummary expandIcon={<ArrowDropDownIcon />} aria-controls="panel3-content" id="panel3-header">
-                <Typography>Account</Typography>
-            </AccordionSummary>
-            <AccordionDetails>
-                <Button 
-                    onClick={SignOut} 
-                    startIcon={<LogoutIcon />}
-                    color="primary"
-                    sx={{ textTransform: "None", color: "#6d3b79"}}
-                >
-                    <Typography>Sign Out</Typography>
-                </Button>
-            </AccordionDetails>
-            </Accordion>
+            <GoogleAccordion />
+            <AccountAccordion SignOut={SignOut} />
         </Paper>
 
         <Topbar header={"Settings"} />
