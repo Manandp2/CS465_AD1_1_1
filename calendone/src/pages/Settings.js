@@ -51,8 +51,8 @@ function BreakList({ breakList, setBreakList }) {
                 dense
             >
                 <ListItemText 
-                    primary={value}
-                    secondary={"Insert break times here"} />
+                    primary={value.name}
+                    secondary={value.startTime.format('hh:mmA') + " - " + value.endTime.format('hh:mmA')} />
             </ListItem>
         );
       })}
@@ -140,6 +140,10 @@ export default function Settings({ setUser, setPage }) {
         });
     };
 
+    // Contains:
+    // Name: string
+    // startDate: dayjs
+    // endDate: dayjs
     const [breakList, setBreakList] = React.useState([]);
 
     return (

@@ -13,33 +13,57 @@ import Select from '@mui/material/Select';
 import Typography from '@mui/material/Typography';
 import TextField from '@mui/material/TextField';
 
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import dayjs from 'dayjs';
+import { TimePicker } from '@mui/x-date-pickers/TimePicker';
+
 import IconButton from '@mui/material/IconButton';
 import EditIcon from '@mui/icons-material/Edit';
 
 export default function BreakEdit({itemToEdit, breakList, setBreakList}) {
-  const [open, setOpen] = React.useState(false);
-  const [name, setName] = React.useState("");
-  const [age, setAge] = React.useState('');
+  // Form validation
+  const [isBreakNameInvalid, setIsBreakNameInvalid] = React.useState(false);
 
-  const handleChange = (event) => {
-    setAge(Number(event.target.value) || '');
-  };
+  const [open, setOpen] = React.useState(false);
+  const [name, setName] = React.useState(itemToEdit.name);
+  // These time values are in DayJS so we might have to modify them to Date before sending them to firebase
+  const [startTime, setStartTime] = React.useState(itemToEdit.startTime);
+  const [endTime, setEndTime] = React.useState(itemToEdit.endTime);
 
   const handleClickOpen = () => {
     setOpen(true);
   };
 
   const handleClose = () => {
+    // Reset state values
+    setIsBreakNameInvalid(false);
+    setName(itemToEdit.name)
+    setStartTime(itemToEdit.startTime)
+    setEndTime(itemToEdit.endTime)
+
     setOpen(false);
   };
   const handleEdit = () => {
-    // Insert edit functionality here
-    const updatedList = breakList.map(item => 
-      item === itemToEdit ? name : item // Replace the item if it matches itemToEdit
-    );
+    if (name === "") {
+      setIsBreakNameInvalid(true)
+    } else {
+      // Reset validation
+      setIsBreakNameInvalid(false)
 
-    setBreakList(updatedList); // Update the state with the new list
-    setOpen(false);
+      // Insert edit functionality here
+      const breakItem = {
+        name: name,
+        startTime: startTime,
+        endTime: endTime
+      }
+      const updatedList = breakList.map(item => 
+        item === itemToEdit ? breakItem : item // Replace the item if it matches itemToEdit
+      );
+
+      setBreakList(updatedList); // Update the state with the new list
+      setOpen(false);
+    }
   }
 
   return (
@@ -52,14 +76,31 @@ export default function BreakEdit({itemToEdit, breakList, setBreakList}) {
         <DialogContent>
           <Box component="form" sx={{ display: 'flex', flexWrap: 'wrap' }}>
             <FormControl sx={{ m: 1, minWidth: 120 }}>
-            <TextField
-                required
-                id="outlined-required"
-                label="Break Name"
-                defaultValue={itemToEdit}
-                onChange={(event) => setName(event.target.value)}
-            />
-              
+              <TextField
+                  required
+                  id="outlined-required"
+                  label="Break Name"
+                  defaultValue={itemToEdit.name}
+                  onChange={(event) => setName(event.target.value)}
+                  error={isBreakNameInvalid}
+                  helperText={isBreakNameInvalid && "The break must have a name"}
+              />
+            </FormControl>
+            <FormControl sx={{ m: 1, minWidth: 120 }}>
+              <TimePicker 
+                label="Start Time"
+                defaultValue={startTime}
+                onChange={(value) => setStartTime(value)}
+                maxTime={endTime}
+               />
+            </FormControl>
+            <FormControl sx={{ m: 1, minWidth: 120 }}>
+              <TimePicker 
+                label="End Time" 
+                defaultValue={endTime}
+                onChange={(value) => setEndTime(value)}
+                minTime={startTime}
+              />
             </FormControl>
           </Box>
         </DialogContent>
