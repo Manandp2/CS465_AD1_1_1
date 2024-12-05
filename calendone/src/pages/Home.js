@@ -18,7 +18,6 @@ import { signOut } from "firebase/auth";
 import { Button } from "@mui/material";
 import { auth, db } from "../utils/firebase";
 import { doc, updateDoc, collection, setDoc } from "firebase/firestore";
-import AddModal from "../components/AddDialog";
 
 function CustomTabPanel(props) {
   const { children, value, index, ...other } = props;
@@ -94,7 +93,6 @@ export default function Home({ setUser, setPage }) {
         <Typography variant="h4">PLACEHOLDER</Typography>
       </Paper>
       <Paper sx={{ overflowY: "scroll" }}>
-        <AddModal />
         <Button onClick={SignOut}>Sign Out</Button>
         <Button onClick={addTodoToFirestore}>Add Todo</Button>
         <Accordion disableGutters>

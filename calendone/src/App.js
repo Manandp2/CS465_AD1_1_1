@@ -7,6 +7,7 @@ import { onAuthStateChanged } from "firebase/auth";
 import { LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import Completed from "./pages/Completed";
+import Settings from "./pages/Settings";
 
 function App() {
   const [currentUser, setCurrentUser] = useState(null);
@@ -33,6 +34,13 @@ function App() {
     return (
       <LocalizationProvider dateAdapter={AdapterDayjs}>
         <Completed setUser={setCurrentUser} setPage={setCurPage} />
+      </LocalizationProvider>
+    );
+  } else if (curPage === "Settings" && currentUser !== null) {
+    console.log(currentUser);
+    return (
+      <LocalizationProvider dateAdapter={AdapterDayjs}>
+        <Settings setUser={setCurrentUser} setPage={setCurPage} />
       </LocalizationProvider>
     );
   } else {

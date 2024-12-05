@@ -14,6 +14,7 @@ import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
 import HomeIcon from "@mui/icons-material/Home";
 import RemoveDoneIcon from "@mui/icons-material/RemoveDone";
 import DeleteIcon from "@mui/icons-material/Delete";
+import AddDialog from "../components/AddDialog";
 
 export default function Bottombar({ status, setPage }) {
   return (
@@ -40,12 +41,10 @@ export default function Bottombar({ status, setPage }) {
             alignItems: "center",
           }}
         >
-          <IconButton sx={{ color: "white" }}>
+          <IconButton sx={{ color: "white" }} onClick={() => setPage("Settings")}>
             <SettingsIcon sx={{ fontSize: "170%" }} />
           </IconButton>
-          <IconButton sx={{ color: "white" }}>
-            <AddCircleOutlineIcon sx={{ fontSize: "170%" }} />
-          </IconButton>
+          <AddDialog />
           <IconButton sx={{ color: "white" }} onClick={() => setPage("Completed")}>
             <ChecklistIcon sx={{ fontSize: "170%" }} />
           </IconButton>
@@ -106,6 +105,20 @@ export default function Bottombar({ status, setPage }) {
           <IconButton sx={{ color: "white" }}>
             <RemoveDoneIcon sx={{ fontSize: "170%" }} />
           </IconButton>
+          <IconButton sx={{ color: "white" }} onClick={() => setPage("Home")}>
+            <HomeIcon sx={{ fontSize: "170%" }} />
+          </IconButton>
+        </Stack>
+      )}
+      {status == "Settings" && (
+        <Stack
+          direction="row"
+          spacing={0}
+          sx={{
+            justifyContent: "space-around",
+            alignItems: "center",
+          }}
+        >
           <IconButton sx={{ color: "white" }} onClick={() => setPage("Home")}>
             <HomeIcon sx={{ fontSize: "170%" }} />
           </IconButton>
