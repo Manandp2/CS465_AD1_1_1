@@ -8,6 +8,7 @@ import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
 import Checkbox from "@mui/material/Checkbox";
 import IconButton from "@mui/material/IconButton";
+import EditDialog from "./EditDialog";
 
 export default function TaskList({ taskList, checked, setChecked }) {
   // const [checked, setChecked] = React.useState([0]);
@@ -26,6 +27,10 @@ export default function TaskList({ taskList, checked, setChecked }) {
     console.log(newChecked);
   };
 
+  // const handleEdit = (value) => () => {
+
+  // }
+
   return (
     <List sx={{ width: "100%", bgcolor: "background.paper" }}>
       {taskList.map((value) => {
@@ -34,9 +39,10 @@ export default function TaskList({ taskList, checked, setChecked }) {
           <ListItem
             key={value}
             secondaryAction={
-              <IconButton edge="end" aria-label="comments">
-                <EditIcon />
-              </IconButton>
+              // <IconButton edge="end" aria-label="comments">
+              //   <EditIcon/>
+              // </IconButton>
+              <EditDialog originalTaskName={value} />
             }
             disablePadding
           >
