@@ -49,13 +49,17 @@ function a11yProps(index) {
 
 export default function Completed({ setUser, setPage }) {
   const [isSelected, setIsSelected] = useState(false);
-  // const [activeTabIndex, setActiveTabIndex] = useState(0);
   const [completedChecked, setCompletedChecked] = React.useState([]);
 
-  const completedList = [];
-  for (let i = 0; i < 10; i++) {
-    completedList.push("Completed Task " + i);
-  }
+  // Define completedList with useState
+  const [completedList, setCompletedList] = useState(() => {
+    const tasks = [];
+    for (let i = 0; i < 10; i++) {
+      tasks.push({ id: `${i}`, name: `Completed Task ${i}` });
+    }
+    return tasks;
+  });
+
   const addTodoToFirestore = () => {
     const tasksCollectionRef = collection(db, "users", auth.currentUser.uid, "tasks");
     const taskDocRef = doc(tasksCollectionRef);
@@ -78,30 +82,75 @@ export default function Completed({ setUser, setPage }) {
       });
   };
 
-  return (
-    <div>
-      <Paper square elevation={3} sx={{ backgroundColor: "white", color: "white", paddingY: "3%" }}>
-        <Typography variant="h4">PLACEHOLDER</Typography>
-      </Paper>
-      <Paper sx={{ overflowY: "scroll" }}>
-        <Accordion disableGutters defaultExpanded>
-          <AccordionSummary expandIcon={<ArrowDropDownIcon />} aria-controls="panel1-content" id="panel1-header">
-            <Typography>Completed Tasks</Typography>
-          </AccordionSummary>
-          <AccordionDetails sx={{ paddingX: "0" }}>
-            <Typography>
-              <TaskList taskList={completedList} checked={completedChecked} setChecked={setCompletedChecked} />
-            </Typography>
-          </AccordionDetails>
-        </Accordion>
-      </Paper>
+  const handleUncomplete = () => {
+    const uncompletedTasks = completedList.filter((task) =>
+      completedChecked.includes(task.id)
+    );
+    const remainingTasks = completedList.filter(
+      (task) => !completedChecked.includes(task.id)
+    );
 
-      <Topbar header={"CalenDone"} />
-      {completedChecked.length === 0 ? (
-        <Bottombar status={"Completed"} setPage={setPage} />
-      ) : (
-        <Bottombar status={"Selected Completed"} setPage={setPage} />
-      )}
-    </div>
-  );
+    console.log("Uncompleted tasks:", uncompletedTasks);
+
+    setCompletedList(remainingTasks);
+    setCompletedChecked([]);
+  };
+
+//   return (
+//     <div>
+//       <Paper square elevation={3} sx={{ backgroundColor: "white", color: "white", paddingY: "3%" }}>
+//         <Typography variant="h4">PLACEHOLDER</Typography>
+//       </Paper>
+//       <Paper sx={{ overflowY: "scroll" }}>
+//         <Accordion disableGutters defaultExpanded>
+//           <AccordionSummary expandIcon={<ArrowDropDownIcon />} aria-controls="panel1-content" id="panel1-header">
+//             <Typography>Completed Tasks</Typography>
+//           </AccordionSummary>
+//           <AccordionDetails sx={{ paddingX: "0" }}>
+//             <Typography>
+//               <TaskList taskList={completedList} checked={completedChecked} setChecked={setCompletedChecked} />
+//             </Typography>
+//           </AccordionDetails>
+//         </Accordion>
+//       </Paper>
+
+//       <Topbar header={"CalenDone"} />
+//       {completedChecked.length === 0 ? (
+//         <Bottombar status={"Completed"} setPage={setPage} />
+//       ) : (
+//         <Bottombar status={"Selected Completed"} setPage={setPage} />
+//       )}
+//     </div>
+//   );
+// }
+return (
+  <div>
+    <Paper square elevation={3} sx={{ backgroundColor: "white", color: "white", paddingY: "3%" }}>
+      <Typography variant="h4">Completed Tasks</Typography>
+    </Paper>
+    <Paper sx={{ overflowY: "scroll" }}>
+      <Typography>
+        <TaskList
+          taskList={completedList.map((task) => task.name)}
+          checked={completedChecked}
+          setChecked={setCompletedChecked}
+        />
+      </Typography>
+    </Paper>
+    <Topbar header={"CalenDone"} />
+    {completedChecked.length === 0 ? (
+      <Bottombar
+        status={"Completed"}
+        setPage={setPage}
+        handleUncomplete={null} // No uncomplete action when nothing is selected
+      />
+    ) : (
+      <Bottombar
+        status={"Selected Completed"}
+        setPage={setPage}
+        handleUncomplete={handleUncomplete}
+      />
+    )}
+  </div>
+);
 }
