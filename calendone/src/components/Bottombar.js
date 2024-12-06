@@ -16,7 +16,7 @@ import ScheduleSendIcon from "@mui/icons-material/ScheduleSend";
 import EventBusyIcon from "@mui/icons-material/EventBusy";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 
-export default function Bottombar({ status, setPage, getTasks }) {
+export default function Bottombar({ status, setPage, getTasks, scheduleTasks, unscheduleTasks }) {
   return (
     <Paper
       square
@@ -58,12 +58,12 @@ export default function Bottombar({ status, setPage, getTasks }) {
             </IconButton>
 
             {status === "HomeUnscheduled" && (
-              <IconButton sx={{ color: "white" }}>
+              <IconButton sx={{ color: "white" }} onClick={scheduleTasks}>
                 <ScheduleSendIcon sx={{ fontSize: "250%" }} />
               </IconButton>
             )}
             {status === "HomeScheduled" && (
-              <IconButton sx={{ color: "white" }}>
+              <IconButton sx={{ color: "white" }} onClick={unscheduleTasks}>
                 <EventBusyIcon sx={{ fontSize: "250%" }} />
               </IconButton>
             )}
