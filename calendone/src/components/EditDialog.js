@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React from "react";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
@@ -34,7 +34,6 @@ export default function EditDialog({
   const [newTaskDescription, setNewTaskDescription] = React.useState(description);
 
   const editTodoInFirestore = () => {
-    console.log("EXECUTE EDIT");
     const tasksCollectionPath = `users/${auth.currentUser.uid}/tasks`;
     const taskDocRef = doc(db, tasksCollectionPath, id); // 'id' is the document ID
     const dueDateAsDate = newDueDate.toDate();
@@ -56,10 +55,6 @@ export default function EditDialog({
         console.error("Error updating task: ", error);
       });
   };
-  useEffect(() => {
-    console.log("dueDate: " + dueDate);
-    console.log("newDueDate: " + newDueDate);
-  }, []);
 
   return (
     <div>
