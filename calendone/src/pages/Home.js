@@ -177,7 +177,16 @@ export default function Home({ setUser, setPage }) {
       ) : (
         <Bottombar status={"Selected Home"} setPage={setPage} />
       )} */}
-      <Bottombar status={bottomBarStatus} setPage={setPage} getTasks={getTasks} scheduleTasks={scheduleTasksFromFirestore} unscheduleTasks={unscheduleTasksFromFirestore}/>
+      <Bottombar 
+        status={bottomBarStatus} 
+        setPage={setPage} 
+        getTasks={getTasks} 
+        scheduleTasks={scheduleTasksFromFirestore} 
+        unscheduleTasks={unscheduleTasksFromFirestore}
+        unSchedChecked={unschedChecked}
+        setUnschedChecked={setUnschedChecked}
+        schedChecked={schedChecked}
+        setSchedChecked={setSchedChecked} />
     </div>
   );
 }

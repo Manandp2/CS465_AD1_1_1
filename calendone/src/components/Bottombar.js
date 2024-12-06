@@ -16,7 +16,54 @@ import ScheduleSendIcon from "@mui/icons-material/ScheduleSend";
 import EventBusyIcon from "@mui/icons-material/EventBusy";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 
-export default function Bottombar({ status, setPage, getTasks, scheduleTasks, unscheduleTasks }) {
+import {auth, db} from "../utils/firebase";
+import {collection, doc, deleteDoc} from "firebase/firestore";
+
+export default function Bottombar({ status, setPage, getTasks, 
+                                    scheduleTasks, unscheduleTasks,
+                                    unSchedChecked, setUnschedChecked,
+                                    schedChecked, setSchedChecked }) {
+  let selectedList;
+  switch(status) {
+    case "HomeUnscheduled":
+      selectedList = unSchedChecked;
+      break;
+    case "HomeScheduled":
+      selectedList = schedChecked;
+      break;
+    case "HomeMixed":
+      selectedList = unSchedChecked.concat(schedChecked);
+  }
+
+  const deleteToDoFromFirestore = (task_id) => {
+      const taskDocRef = doc(db, "users", auth.currentUser.uid, "tasks", task_id);
+      deleteDoc(taskDocRef);
+  };
+
+  const handleDelete = () => {
+      // deleteToDoFromFirestore("OVDCAnvF3Re5LaCsbH1w")
+      // Delete each listItem through firestore
+      selectedList.map((task_id) => {
+        // Delete each list item here
+        deleteToDoFromFirestore(task_id)
+      })
+
+      // Reset the checkedlists to bring back the unselected bottom bar
+      switch(status) {
+        case "HomeUnscheduled":
+          setUnschedChecked([]);
+          break;
+        case "HomeScheduled":
+          setSchedChecked([]);
+          break;
+        case "HomeMixed":
+          setUnschedChecked([]);
+          setSchedChecked([]);
+      }
+
+      // Refresh and getTasks again
+      getTasks();
+  }
   return (
     <Paper
       square
@@ -43,7 +90,7 @@ export default function Bottombar({ status, setPage, getTasks, scheduleTasks, un
         {status === "Home" && (
           <>
             <IconButton sx={{ color: "white" }}>
-              <SettingsIcon sx={{ fontSize: "170%" }} />
+              <SettingsIcon sx={{ fontSize: "170%" }} onClick={() => setPage("Settings")} />
             </IconButton>
             <AddDialog getTasks={getTasks} />
             <IconButton sx={{ color: "white" }} onClick={() => setPage("Completed")}>
@@ -54,7 +101,7 @@ export default function Bottombar({ status, setPage, getTasks, scheduleTasks, un
         {(status === "HomeUnscheduled" || status === "HomeScheduled" || status === "HomeMixed") && (
           <>
             <IconButton sx={{ color: "white" }}>
-              <DeleteIcon sx={{ fontSize: "170%" }} />
+              <DeleteIcon sx={{ fontSize: "170%" }} onClick={handleDelete} />
             </IconButton>
 
             {status === "HomeUnscheduled" && (
@@ -98,6 +145,13 @@ export default function Bottombar({ status, setPage, getTasks, scheduleTasks, un
             <IconButton sx={{ color: "white" }}>
               <RemoveDoneIcon sx={{ fontSize: "250%" }} />
             </IconButton>
+            <IconButton sx={{ color: "white" }} onClick={() => setPage("Home")}>
+              <HomeIcon sx={{ fontSize: "170%" }} />
+            </IconButton>
+          </>
+        )}
+        {status === "Settings" && (
+          <>
             <IconButton sx={{ color: "white" }} onClick={() => setPage("Home")}>
               <HomeIcon sx={{ fontSize: "170%" }} />
             </IconButton>
