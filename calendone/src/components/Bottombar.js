@@ -20,6 +20,7 @@ import {auth, db} from "../utils/firebase";
 import {collection, doc, deleteDoc} from "firebase/firestore";
 
 export default function Bottombar({ status, setPage, getTasks, 
+                                    scheduleTasks, unscheduleTasks,
                                     unSchedChecked, setUnschedChecked,
                                     schedChecked, setSchedChecked }) {
   let selectedList;
@@ -63,7 +64,6 @@ export default function Bottombar({ status, setPage, getTasks,
       // Refresh and getTasks again
       getTasks();
   }
-
   return (
     <Paper
       square
@@ -105,12 +105,12 @@ export default function Bottombar({ status, setPage, getTasks,
             </IconButton>
 
             {status === "HomeUnscheduled" && (
-              <IconButton sx={{ color: "white" }}>
+              <IconButton sx={{ color: "white" }} onClick={scheduleTasks}>
                 <ScheduleSendIcon sx={{ fontSize: "250%" }} />
               </IconButton>
             )}
             {status === "HomeScheduled" && (
-              <IconButton sx={{ color: "white" }}>
+              <IconButton sx={{ color: "white" }} onClick={unscheduleTasks}>
                 <EventBusyIcon sx={{ fontSize: "250%" }} />
               </IconButton>
             )}

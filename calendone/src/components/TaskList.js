@@ -64,7 +64,15 @@ export default function TaskList({ taskList, checked, setChecked, getTasks }) {
                   inputProps={{ "aria-labelledby": labelId }}
                 />
               </ListItemIcon>
-              <ListItemText id={labelId} primary={name} />
+              <ListItemText
+                id={labelId}
+                primary={name}
+                secondary={
+                  isScheduled
+                    ? "SHCELDUED TIME"
+                    : dueDate.toLocaleDateString() + " at " + dueDate.toLocaleTimeString("en-US")
+                }
+              />
             </ListItemButton>
           </ListItem>
         );

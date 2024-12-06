@@ -1,6 +1,4 @@
 import React, { useEffect, useState } from "react";
-import PropTypes from "prop-types";
-import Box from "@mui/material/Box";
 
 import Bottombar from "../components/Bottombar";
 import TaskList from "../components/TaskList";
@@ -14,7 +12,7 @@ import { Button, Paper } from "@mui/material";
 
 import { signOut } from "firebase/auth";
 import { auth, db } from "../utils/firebase";
-import { collection, getDocs } from "firebase/firestore";
+import {collection, doc, getDocs, writeBatch} from "firebase/firestore";
 import RecapDialog from "../components/RecapDialog";
 export default function Home({ setUser, setPage }) {
   const SignOut = () => {
@@ -34,6 +32,38 @@ export default function Home({ setUser, setPage }) {
   const [unschedChecked, setUnschedChecked] = React.useState([]);
   const [schedChecked, setSchedChecked] = React.useState([]);
   const [newCompletedExist, setNewCompletedExist] = React.useState(true);
+
+  const scheduleTasksFromFirestore = () => {
+    const batch = writeBatch(db);  // Create a new batch instance
+    const tasksCollectionPath = `users/${auth.currentUser.uid}/tasks`;
+
+    unschedChecked.forEach((task) => {
+      const taskDocRef = doc(db, tasksCollectionPath, task); // Create a reference to the document
+      batch.update(taskDocRef, { isScheduled: true }); // Add the update operation to the batch
+    });
+
+    batch.commit()
+    .then(() => {
+      setUnschedChecked([]);
+      getTasks();
+    })
+  }
+
+  const unscheduleTasksFromFirestore = () => {
+    const batch = writeBatch(db);  // Create a new batch instance
+    const tasksCollectionPath = `users/${auth.currentUser.uid}/tasks`;
+
+    schedChecked.forEach((task) => {
+      const taskDocRef = doc(db, tasksCollectionPath, task); // Create a reference to the document
+      batch.update(taskDocRef, { isScheduled: false }); // Add the update operation to the batch
+    });
+
+    batch.commit()
+    .then(() => {
+      setSchedChecked([]);
+      getTasks();
+    })
+  }
 
   const getTasks = () => {
     const tasksCollectionRef = collection(db, "users", auth.currentUser.uid, "tasks");
@@ -151,6 +181,8 @@ export default function Home({ setUser, setPage }) {
         status={bottomBarStatus} 
         setPage={setPage} 
         getTasks={getTasks} 
+        scheduleTasks={scheduleTasksFromFirestore} 
+        unscheduleTasks={unscheduleTasksFromFirestore}
         unSchedChecked={unschedChecked}
         setUnschedChecked={setUnschedChecked}
         schedChecked={schedChecked}
