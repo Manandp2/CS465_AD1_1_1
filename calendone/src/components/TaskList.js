@@ -1,16 +1,13 @@
 import React from "react";
-import EditIcon from "@mui/icons-material/Edit";
-
 import List from "@mui/material/List";
 import ListItem from "@mui/material/ListItem";
 import ListItemButton from "@mui/material/ListItemButton";
 import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
 import Checkbox from "@mui/material/Checkbox";
-import IconButton from "@mui/material/IconButton";
 import EditDialog from "./EditDialog";
 
-export default function TaskList({ taskList, checked, setChecked }) {
+export default function TaskList({taskList, checked, setChecked, getTasks}) {
   // const [checked, setChecked] = React.useState([0]);
 
   const handleToggle = (value) => () => {
@@ -32,31 +29,42 @@ export default function TaskList({ taskList, checked, setChecked }) {
   // }
 
   return (
-    <List sx={{ width: "100%", bgcolor: "background.paper" }}>
-      {taskList.map((value) => {
-        const labelId = `checkbox-list-label-${value}`;
+    <List sx={{width: "100%", bgcolor: "background.paper"}}>
+      {taskList.map(({
+                       name,
+                       description,
+                       dueDate,
+                       duration,
+                       isScheduled,
+                       isComplete,
+                       id,
+                       gCalId
+                     }) => {
+        const labelId = `checkbox-list-label-${id}`;
         return (
           <ListItem
-            key={value}
+            key={id}
             secondaryAction={
               // <IconButton edge="end" aria-label="comments">
               //   <EditIcon/>
               // </IconButton>
-              <EditDialog originalTaskName={value} />
+              <EditDialog name={name} description={description} dueDate={dueDate} duration={duration}
+                          isScheduled={isScheduled} isComplete={isComplete} id={id} gCalId={gCalId}
+                          getTasks={getTasks}/>
             }
             disablePadding
           >
-            <ListItemButton role={undefined} onClick={handleToggle(value)} dense>
+            <ListItemButton role={undefined} onClick={handleToggle(id)} dense>
               <ListItemIcon>
                 <Checkbox
                   edge="start"
-                  checked={checked.includes(value)}
+                  checked={checked.includes(id)}
                   tabIndex={-1}
                   disableRipple
-                  inputProps={{ "aria-labelledby": labelId }}
+                  inputProps={{"aria-labelledby": labelId}}
                 />
               </ListItemIcon>
-              <ListItemText id={labelId} primary={value} />
+              <ListItemText id={labelId} primary={name}/>
             </ListItemButton>
           </ListItem>
         );
