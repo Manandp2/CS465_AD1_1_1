@@ -8,45 +8,35 @@ import { onAuthStateChanged } from "firebase/auth";
 import { LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import Completed from "./pages/Completed";
+import Laodi from "./pages/Laodi";
 
 function App() {
   const [currentUser, setCurrentUser] = useState(null);
-  const [curPage, setCurPage] = useState("Home");
+  const [curPage, setCurPage] = useState("Loading");
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       setCurrentUser(user);
+      setCurPage("Home");
     });
 
     // Cleanup subscription on unmount
     return () => unsubscribe();
   }, []);
-
-  if (curPage === "Home" && currentUser !== null) {
-    return (
-      <LocalizationProvider dateAdapter={AdapterDayjs}>
-        <>
-          <Home setUser={setCurrentUser} setPage={setCurPage} />
-        </>
-      </LocalizationProvider>
-    );
-  } else if (curPage === "Completed" && currentUser !== null) {
-    console.log(currentUser);
-    return (
-      <LocalizationProvider dateAdapter={AdapterDayjs}>
-        <Completed setUser={setCurrentUser} setPage={setCurPage} />
-      </LocalizationProvider>
-    );
-  } else if (curPage === "Settings" && currentUser !== null) {
-    console.log(currentUser);
-    return (
-      <LocalizationProvider dateAdapter={AdapterDayjs}>
-        <Settings setUser={setCurrentUser} setPage={setCurPage} />
-      </LocalizationProvider>
-    );
-  } else {
-    return <SignIn setUser={setCurrentUser} />;
+  if (curPage === "Loading") {
+    return <Laodi />;
   }
+  if (currentUser !== null) {
+    return (
+      <LocalizationProvider dateAdapter={AdapterDayjs}>
+        {curPage === "Home" && <Home setUser={setCurrentUser} setPage={setCurPage} />}
+        {curPage === "Completed" && <Completed setUser={setCurrentUser} setPage={setCurPage} />}
+        {curPage === "Settings" && <Settings setUser={setCurrentUser} setPage={setCurPage} />}
+      </LocalizationProvider>
+    );
+  }
+
+  return <SignIn setUser={setCurrentUser} />;
 }
 
 export default App;
