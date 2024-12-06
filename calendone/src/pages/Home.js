@@ -8,11 +8,11 @@ import AccordionSummary from "@mui/material/AccordionSummary";
 import AccordionDetails from "@mui/material/AccordionDetails";
 import Typography from "@mui/material/Typography";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
-import { Button, Paper } from "@mui/material";
+import { Button, Checkbox, Paper } from "@mui/material";
 
 import { signOut } from "firebase/auth";
 import { auth, db } from "../utils/firebase";
-import {collection, doc, getDocs, writeBatch} from "firebase/firestore";
+import { collection, doc, getDocs, writeBatch } from "firebase/firestore";
 import RecapDialog from "../components/RecapDialog";
 export default function Home({ setUser, setPage }) {
   const SignOut = () => {
@@ -29,12 +29,17 @@ export default function Home({ setUser, setPage }) {
   const [unscheduledTasks, setUnscheduledTasks] = useState([]);
   const [scheduledTasks, setScheduledTasks] = useState([]);
   const [bottomBarStatus, setBottomBarStatus] = useState("Home");
+
+  const [allUnschedChecked, setAllUnschedChecked] = useState(false);
+  const [allSchedChecked, setAllSchedChecked] = useState(false);
+
   const [unschedChecked, setUnschedChecked] = React.useState([]);
   const [schedChecked, setSchedChecked] = React.useState([]);
+
   const [newCompletedExist, setNewCompletedExist] = React.useState(true);
 
   const scheduleTasksFromFirestore = () => {
-    const batch = writeBatch(db);  // Create a new batch instance
+    const batch = writeBatch(db); // Create a new batch instance
     const tasksCollectionPath = `users/${auth.currentUser.uid}/tasks`;
 
     unschedChecked.forEach((task) => {
@@ -42,15 +47,15 @@ export default function Home({ setUser, setPage }) {
       batch.update(taskDocRef, { isScheduled: true }); // Add the update operation to the batch
     });
 
-    batch.commit()
-    .then(() => {
+    batch.commit().then(() => {
       setUnschedChecked([]);
+      setAllUnschedChecked(false);
       getTasks();
-    })
-  }
+    });
+  };
 
   const unscheduleTasksFromFirestore = () => {
-    const batch = writeBatch(db);  // Create a new batch instance
+    const batch = writeBatch(db); // Create a new batch instance
     const tasksCollectionPath = `users/${auth.currentUser.uid}/tasks`;
 
     schedChecked.forEach((task) => {
@@ -58,12 +63,12 @@ export default function Home({ setUser, setPage }) {
       batch.update(taskDocRef, { isScheduled: false }); // Add the update operation to the batch
     });
 
-    batch.commit()
-    .then(() => {
+    batch.commit().then(() => {
       setSchedChecked([]);
+      setAllSchedChecked(false);
       getTasks();
-    })
-  }
+    });
+  };
 
   const completeTasksFromFirestore = () => {
     const batch = writeBatch(db);  // Create a new batch instance
@@ -123,6 +128,28 @@ export default function Home({ setUser, setPage }) {
   }, []);
 
   useEffect(() => {
+    if (allUnschedChecked) {
+      setUnschedChecked([]);
+      unscheduledTasks.forEach((task) => {
+        setUnschedChecked((prev) => [...prev, task.id]);
+      });
+    } else {
+      setUnschedChecked([]);
+    }
+  }, [allUnschedChecked]);
+
+  useEffect(() => {
+    if (allSchedChecked) {
+      setSchedChecked([]);
+      scheduledTasks.forEach((task) => {
+        setSchedChecked((prev) => [...prev, task.id]);
+      });
+    } else {
+      setSchedChecked([]);
+    }
+  }, [allSchedChecked]);
+
+  useEffect(() => {
     const sLen = schedChecked.length;
     const uLen = unschedChecked.length;
     if (sLen === 0 && uLen === 0) {
@@ -147,7 +174,16 @@ export default function Home({ setUser, setPage }) {
         <Button onClick={SignOut}>Sign Out</Button>
         <Accordion disableGutters>
           <AccordionSummary expandIcon={<ArrowDropDownIcon />} aria-controls="panel1-content" id="panel1-header">
-            <Typography>Unscheduled Tasks</Typography>
+            <Checkbox
+              edge="start"
+              onClick={(e) => {
+                e.stopPropagation();
+                setAllUnschedChecked(!allUnschedChecked);
+              }}
+              checked={allUnschedChecked}
+              disabled={unscheduledTasks.length === 0}
+            />
+            <Typography sx={{ display: "flex", alignItems: "center" }}>Unscheduled Tasks</Typography>
           </AccordionSummary>
           <AccordionDetails sx={{ paddingX: "0" }}>
             <Typography>
@@ -162,7 +198,16 @@ export default function Home({ setUser, setPage }) {
         </Accordion>
         <Accordion>
           <AccordionSummary expandIcon={<ArrowDropDownIcon />} aria-controls="panel2-content" id="panel2-header">
-            <Typography>Scheduled Tasks</Typography>
+            <Checkbox
+              edge="start"
+              onClick={(e) => {
+                e.stopPropagation();
+                setAllSchedChecked(!allSchedChecked);
+              }}
+              checked={allSchedChecked}
+              disabled={scheduledTasks.length === 0}
+            />
+            <Typography sx={{ display: "flex", alignItems: "center" }}>Scheduled Tasks</Typography>
           </AccordionSummary>
           <AccordionDetails sx={{ paddingX: "0" }}>
             <Typography>
@@ -200,11 +245,11 @@ export default function Home({ setUser, setPage }) {
       ) : (
         <Bottombar status={"Selected Home"} setPage={setPage} />
       )} */}
-      <Bottombar 
-        status={bottomBarStatus} 
-        setPage={setPage} 
-        getTasks={getTasks} 
-        scheduleTasks={scheduleTasksFromFirestore} 
+      <Bottombar
+        status={bottomBarStatus}
+        setPage={setPage}
+        getTasks={getTasks}
+        scheduleTasks={scheduleTasksFromFirestore}
         unscheduleTasks={unscheduleTasksFromFirestore}
         unSchedChecked={unschedChecked}
         setUnschedChecked={setUnschedChecked}
