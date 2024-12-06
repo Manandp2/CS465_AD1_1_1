@@ -119,10 +119,10 @@ export default function Completed({ setPage }) {
         <Typography variant="h4">PLACEHOLDER</Typography>
       </Paper>
       <Paper sx={{ overflowY: "scroll" }}>
-        <Accordion disableGutters defaultExpanded>
+        <Accordion disableGutters expanded>
           <AccordionSummary
             sx={{ marginBottom: -2 }}
-            expandIcon={<ArrowDropDownIcon />}
+            // expandIcon={<ArrowDropDownIcon />}
             aria-controls="panel1-content"
             id="panel1-header"
           >
