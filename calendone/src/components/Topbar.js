@@ -6,7 +6,7 @@ export default function Topbar({ header }) {
   return (
     <Paper
       square
-      elevation={3}
+      // elevation={3}
       sx={{
         backgroundColor: "#6d3b79",
         color: "white",

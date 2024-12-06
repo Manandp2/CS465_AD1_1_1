@@ -168,7 +168,7 @@ export default function Home({ setUser, setPage }) {
       <Paper square elevation={3} sx={{ backgroundColor: "white", color: "white", paddingY: "3%" }}>
         <Typography variant="h4">PLACEHOLDER</Typography>
       </Paper>
-      <Paper sx={{ overflowY: "scroll" }}>
+      <Paper square elevation={0} sx={{ overflowY: "scroll" }}>
         <Button onClick={SignOut}>Sign Out</Button>
         <Accordion disableGutters defaultExpanded>
           <AccordionSummary expandIcon={<ArrowDropDownIcon />} aria-controls="panel1-content" id="panel1-header">
