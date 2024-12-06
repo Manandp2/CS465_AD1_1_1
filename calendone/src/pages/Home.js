@@ -1,5 +1,6 @@
-import React, { useEffect } from "react";
-import { useState } from "react";
+import React, { useEffect, useState } from "react";
+import PropTypes from "prop-types";
+import Box from "@mui/material/Box";
 
 import Bottombar from "../components/Bottombar";
 import TaskList from "../components/TaskList";
@@ -9,7 +10,7 @@ import AccordionSummary from "@mui/material/AccordionSummary";
 import AccordionDetails from "@mui/material/AccordionDetails";
 import Typography from "@mui/material/Typography";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
-import { Paper } from "@mui/material";
+import { Button, Paper } from "@mui/material";
 
 import { signOut } from "firebase/auth";
 import { Button } from "@mui/material";
@@ -43,10 +44,20 @@ export default function Home({ setUser, setPage }) {
         setScheduledTasks([]);
         querySnapshot.forEach((doc) => {
           const task = doc.data();
-          if (task.isScheduled) {
-            setScheduledTasks((prev) => [...prev, task.name]);
-          } else {
-            setUnscheduledTasks((prev) => [...prev, task.name]);
+          const fullTask = {
+            name: task.name,
+            description: task.description,
+            dueDate: task.dueDate.toDate(),
+            duration: task.duration,
+            isScheduled: task.isScheduled,
+            isComplete: task.isComplete,
+            id: doc.id,
+            gCalId: task.gCalId,
+          };
+          if (task.isScheduled && !task.isComplete) {
+            setScheduledTasks((prev) => [...prev, fullTask]);
+          } else if (!task.isScheduled && !task.isComplete) {
+            setUnscheduledTasks((prev) => [...prev, fullTask]);
           }
         });
       })
@@ -88,7 +99,12 @@ export default function Home({ setUser, setPage }) {
           </AccordionSummary>
           <AccordionDetails sx={{ paddingX: "0" }}>
             <Typography>
-              <TaskList taskList={unscheduledTasks} checked={unschedChecked} setChecked={setUnschedChecked} />
+              <TaskList
+                taskList={unscheduledTasks}
+                checked={unschedChecked}
+                setChecked={setUnschedChecked}
+                getTasks={getTasks}
+              />
             </Typography>
           </AccordionDetails>
         </Accordion>
@@ -98,7 +114,12 @@ export default function Home({ setUser, setPage }) {
           </AccordionSummary>
           <AccordionDetails sx={{ paddingX: "0" }}>
             <Typography>
-              <TaskList taskList={scheduledTasks} checked={schedChecked} setChecked={setSchedChecked} />
+              <TaskList
+                taskList={scheduledTasks}
+                checked={schedChecked}
+                setChecked={setSchedChecked}
+                getTasks={getTasks}
+              />
             </Typography>
           </AccordionDetails>
         </Accordion>
