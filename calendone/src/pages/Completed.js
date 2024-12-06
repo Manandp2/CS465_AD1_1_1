@@ -18,6 +18,7 @@ import { signOut } from "firebase/auth";
 import { Button } from "@mui/material";
 import { auth, db } from "../utils/firebase";
 import { doc, updateDoc, collection, setDoc } from "firebase/firestore";
+
 function CustomTabPanel(props) {
   const { children, value, index, ...other } = props;
 
@@ -51,11 +52,13 @@ export default function Completed({ setUser, setPage }) {
   const [isSelected, setIsSelected] = useState(false);
   // const [activeTabIndex, setActiveTabIndex] = useState(0);
   const [completedChecked, setCompletedChecked] = React.useState([]);
+  const [showRecapModal, setShowRecapModal] = useState(false);
 
   const completedList = [];
   for (let i = 0; i < 10; i++) {
     completedList.push("Completed Task " + i);
   }
+
   const addTodoToFirestore = () => {
     const tasksCollectionRef = collection(db, "users", auth.currentUser.uid, "tasks");
     const taskDocRef = doc(tasksCollectionRef);

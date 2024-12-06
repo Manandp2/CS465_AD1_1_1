@@ -15,7 +15,7 @@ import { signOut } from "firebase/auth";
 import { Button } from "@mui/material";
 import { auth, db } from "../utils/firebase";
 import { collection, getDocs } from "firebase/firestore";
-
+import RecapDialog from "../components/RecapDialog";
 export default function Home({ setUser, setPage }) {
   const SignOut = () => {
     signOut(auth)
@@ -33,6 +33,7 @@ export default function Home({ setUser, setPage }) {
   const [bottomBarStatus, setBottomBarStatus] = useState("Home");
   const [unschedChecked, setUnschedChecked] = React.useState([]);
   const [schedChecked, setSchedChecked] = React.useState([]);
+  const [newCompletedExist, setNewCompletedExist] = React.useState(true);
 
   const getTasks = () => {
     const tasksCollectionRef = collection(db, "users", auth.currentUser.uid, "tasks");
@@ -75,6 +76,7 @@ export default function Home({ setUser, setPage }) {
 
   return (
     <div>
+      <RecapDialog open={newCompletedExist} setOpen={setNewCompletedExist} />
       <Paper square elevation={3} sx={{ backgroundColor: "white", color: "white", paddingY: "3%" }}>
         <Typography variant="h4">PLACEHOLDER</Typography>
       </Paper>
