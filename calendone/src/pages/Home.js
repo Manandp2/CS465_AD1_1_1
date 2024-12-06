@@ -179,7 +179,7 @@ export default function Home({ setPage }) {
           gapi.client.calendar.calendarList
             .list()
             .then((response) => {
-          setEventsFromCalendar([]);
+              setEventsFromCalendar([]);
               const calendars = response.result.items;
               if (calendars.length > 0) {
                 calendars.forEach((calendar) => {
@@ -231,10 +231,15 @@ export default function Home({ setPage }) {
       <Paper square elevation={3} sx={{ backgroundColor: "white", color: "white", paddingY: "3%" }}>
         <Typography variant="h4">PLACEHOLDER</Typography>
       </Paper>
-      <Paper square elevation={0} sx={{ overflowY: "scroll" }}>
-        <Button onClick={getGoogleCalendarEvents}>Get events</Button>
+      <Paper variant="outlined" square elevation={0} sx={{ overflowY: "scroll" }}>
+        {/* <Button onClick={getGoogleCalendarEvents}>Get events</Button> */}
         <Accordion disableGutters defaultExpanded>
-          <AccordionSummary expandIcon={<ArrowDropDownIcon />} aria-controls="panel1-content" id="panel1-header">
+          <AccordionSummary
+            sx={{ marginBottom: -2 }}
+            expandIcon={<ArrowDropDownIcon />}
+            aria-controls="panel1-content"
+            id="panel1-header"
+          >
             <Checkbox
               edge="start"
               onClick={(e) => {
@@ -257,8 +262,13 @@ export default function Home({ setPage }) {
             </Typography>
           </AccordionDetails>
         </Accordion>
-        <Accordion defaultExpanded>
-          <AccordionSummary expandIcon={<ArrowDropDownIcon />} aria-controls="panel2-content" id="panel2-header">
+        <Accordion disableGutters defaultExpanded>
+          <AccordionSummary
+            sx={{ marginBottom: -2 }}
+            expandIcon={<ArrowDropDownIcon />}
+            aria-controls="panel2-content"
+            id="panel2-header"
+          >
             <Checkbox
               edge="start"
               onClick={(e) => {

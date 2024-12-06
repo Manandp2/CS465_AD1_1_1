@@ -120,7 +120,12 @@ export default function Completed({ setPage }) {
       </Paper>
       <Paper sx={{ overflowY: "scroll" }}>
         <Accordion disableGutters defaultExpanded>
-          <AccordionSummary expandIcon={<ArrowDropDownIcon />} aria-controls="panel1-content" id="panel1-header">
+          <AccordionSummary
+            sx={{ marginBottom: -2 }}
+            expandIcon={<ArrowDropDownIcon />}
+            aria-controls="panel1-content"
+            id="panel1-header"
+          >
             <Checkbox
               edge="start"
               onClick={(e) => {
