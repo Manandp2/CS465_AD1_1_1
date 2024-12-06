@@ -16,17 +16,25 @@ import ScheduleSendIcon from "@mui/icons-material/ScheduleSend";
 import EventBusyIcon from "@mui/icons-material/EventBusy";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 
-import {auth, db} from "../utils/firebase";
-import {doc, deleteDoc} from "firebase/firestore";
+import { auth, db } from "../utils/firebase";
+import { doc, deleteDoc } from "firebase/firestore";
 
-export default function Bottombar({ status, setPage, getTasks, 
-                                    scheduleTasks, unscheduleTasks,
-                                    unSchedChecked, setUnschedChecked,
-                                    schedChecked, setSchedChecked,
-                                    unCompleteTasks, deleteCompletedTasks,
-                                    completeTasks }) {
+export default function Bottombar({
+  status,
+  setPage,
+  getTasks,
+  scheduleTasks,
+  unscheduleTasks,
+  unSchedChecked,
+  setUnschedChecked,
+  schedChecked,
+  setSchedChecked,
+  unCompleteTasks,
+  deleteCompletedTasks,
+  completeTasks,
+}) {
   let selectedList;
-  switch(status) {
+  switch (status) {
     case "HomeUnscheduled":
       selectedList = unSchedChecked;
       break;
@@ -38,34 +46,34 @@ export default function Bottombar({ status, setPage, getTasks,
   }
 
   const deleteToDoFromFirestore = (task_id) => {
-      const taskDocRef = doc(db, "users", auth.currentUser.uid, "tasks", task_id);
-      deleteDoc(taskDocRef);
+    const taskDocRef = doc(db, "users", auth.currentUser.uid, "tasks", task_id);
+    deleteDoc(taskDocRef);
   };
 
   const handleDelete = () => {
-      // deleteToDoFromFirestore("OVDCAnvF3Re5LaCsbH1w")
-      // Delete each listItem through firestore
-      selectedList.map((task_id) => {
-        // Delete each list item here
-        deleteToDoFromFirestore(task_id)
-      })
+    // deleteToDoFromFirestore("OVDCAnvF3Re5LaCsbH1w")
+    // Delete each listItem through firestore
+    selectedList.map((task_id) => {
+      // Delete each list item here
+      deleteToDoFromFirestore(task_id);
+    });
 
-      // Reset the checkedlists to bring back the unselected bottom bar
-      switch(status) {
-        case "HomeUnscheduled":
-          setUnschedChecked([]);
-          break;
-        case "HomeScheduled":
-          setSchedChecked([]);
-          break;
-        case "HomeMixed":
-          setUnschedChecked([]);
-          setSchedChecked([]);
-      }
+    // Reset the checkedlists to bring back the unselected bottom bar
+    switch (status) {
+      case "HomeUnscheduled":
+        setUnschedChecked([]);
+        break;
+      case "HomeScheduled":
+        setSchedChecked([]);
+        break;
+      case "HomeMixed":
+        setUnschedChecked([]);
+        setSchedChecked([]);
+    }
 
-      // Refresh and getTasks again
-      getTasks();
-  }
+    // Refresh and getTasks again
+    getTasks();
+  };
   return (
     <Paper
       square
@@ -155,7 +163,7 @@ export default function Bottombar({ status, setPage, getTasks,
         {status === "Settings" && (
           <>
             <IconButton sx={{ color: "white" }} onClick={() => setPage("Home")}>
-              <HomeIcon sx={{ fontSize: "170%" }} />
+              <HomeIcon sx={{ fontSize: "250%" }} />
             </IconButton>
           </>
         )}
