@@ -1,7 +1,7 @@
 # CS465_AD1_1_1
 
 ## Quick Start
-1. To compile on your local machine, try running these commands in the terminal within src/calendone:
+1. To compile on your local machine:
 ```shell
 cd calendone
 npm install
