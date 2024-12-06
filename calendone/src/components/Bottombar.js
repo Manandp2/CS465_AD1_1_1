@@ -16,7 +16,28 @@ import ScheduleSendIcon from "@mui/icons-material/ScheduleSend";
 import EventBusyIcon from "@mui/icons-material/EventBusy";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 
-export default function Bottombar({ status, setPage, getTasks }) {
+import {auth, db} from "../utils/firebase";
+import {collection, doc, deleteDoc} from "firebase/firestore";
+
+export default function Bottombar({ status, setPage, getTasks, selectedList, setSelectedList }) {
+  const deleteToDoFromFirestore = (task_id) => {
+      const taskDocRef = doc(db, "users", auth.currentUser.uid, "tasks", task_id);
+      deleteDoc(taskDocRef);
+  };
+
+  const handleDelete = () => {
+      // deleteToDoFromFirestore("OVDCAnvF3Re5LaCsbH1w")
+      // Delete each listItem through firestore
+      selectedList.map((task_id) => {
+        // Delete each list item here
+        deleteToDoFromFirestore(task_id)
+      })
+      
+      // Empty out the list
+      setSelectedList([])
+      getTasks();
+  }
+
   return (
     <Paper
       square
@@ -54,7 +75,7 @@ export default function Bottombar({ status, setPage, getTasks }) {
         {(status === "HomeUnscheduled" || status === "HomeScheduled" || status === "HomeMixed") && (
           <>
             <IconButton sx={{ color: "white" }}>
-              <DeleteIcon sx={{ fontSize: "170%" }} />
+              <DeleteIcon sx={{ fontSize: "170%" }} onClick={handleDelete} />
             </IconButton>
 
             {status === "HomeUnscheduled" && (

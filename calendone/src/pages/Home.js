@@ -147,7 +147,12 @@ export default function Home({ setUser, setPage }) {
       ) : (
         <Bottombar status={"Selected Home"} setPage={setPage} />
       )} */}
-      <Bottombar status={bottomBarStatus} setPage={setPage} getTasks={getTasks} />
+      <Bottombar 
+        status={bottomBarStatus} 
+        setPage={setPage} 
+        getTasks={getTasks} 
+        selectedList={unschedChecked}
+        setSelectedList={setUnschedChecked} />
     </div>
   );
 }
