@@ -121,7 +121,6 @@ export default function Completed({ setPage }) {
       <Paper sx={{ overflowY: "scroll" }}>
         <Accordion disableGutters expanded>
           <AccordionSummary
-            sx={{ marginBottom: -2 }}
             // expandIcon={<ArrowDropDownIcon />}
             aria-controls="panel1-content"
             id="panel1-header"

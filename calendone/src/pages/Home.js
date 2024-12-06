@@ -234,12 +234,7 @@ export default function Home({ setPage }) {
       <Paper variant="outlined" square elevation={0} sx={{ overflowY: "scroll" }}>
         {/* <Button onClick={getGoogleCalendarEvents}>Get events</Button> */}
         <Accordion disableGutters defaultExpanded>
-          <AccordionSummary
-            sx={{ marginBottom: -2 }}
-            expandIcon={<ArrowDropDownIcon />}
-            aria-controls="panel1-content"
-            id="panel1-header"
-          >
+          <AccordionSummary expandIcon={<ArrowDropDownIcon />} aria-controls="panel1-content" id="panel1-header">
             <Checkbox
               edge="start"
               onClick={(e) => {
@@ -263,12 +258,7 @@ export default function Home({ setPage }) {
           </AccordionDetails>
         </Accordion>
         <Accordion disableGutters defaultExpanded>
-          <AccordionSummary
-            sx={{ marginBottom: -2 }}
-            expandIcon={<ArrowDropDownIcon />}
-            aria-controls="panel2-content"
-            id="panel2-header"
-          >
+          <AccordionSummary expandIcon={<ArrowDropDownIcon />} aria-controls="panel2-content" id="panel2-header">
             <Checkbox
               edge="start"
               onClick={(e) => {
