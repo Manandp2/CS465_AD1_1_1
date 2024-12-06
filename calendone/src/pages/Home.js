@@ -13,7 +13,6 @@ import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 import { Button, Paper } from "@mui/material";
 
 import { signOut } from "firebase/auth";
-import { Button } from "@mui/material";
 import { auth, db } from "../utils/firebase";
 import { collection, getDocs } from "firebase/firestore";
 import RecapDialog from "../components/RecapDialog";
