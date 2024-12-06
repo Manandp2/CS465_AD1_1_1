@@ -179,6 +179,7 @@ export default function Home({setPage}) {
 
         gapi.client.calendar.calendarList.list()
         .then((response) => {
+          setEventsFromCalendar([]);
           const calendars = response.result.items;
           if (calendars.length > 0) {
             calendars.forEach((calendar) => {
