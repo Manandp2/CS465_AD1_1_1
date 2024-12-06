@@ -65,21 +65,6 @@ export default function AddDialog({getTasks}) {
           },
         }}
       >
-        {/* <Paper
-          elevation={3}
-          sx={{
-            position: "absolute",
-            top: "50%",
-            left: "50%",
-            transform: "translate(-50%, -50%)",
-            width: "70%",
-            height: "70%",
-            textAlign: "left",
-            padding: 4,
-            overflowY: "auto",
-          }}
-        > */}
-
         {/* Title */}
         <DialogTitle>Add To-Do</DialogTitle>
         <DialogContent>
