@@ -7,10 +7,10 @@ import { doc, setDoc } from "firebase/firestore";
 function generateSparkles(numSparkles) {
   const sparkles = [];
   for (let i = 0; i < numSparkles; i++) {
-    const randomX = Math.random() * 100; 
-    const randomY = Math.random() * 100; 
-    const randomSize = Math.random() * 5 + 3; 
-    const randomDuration = Math.random() * 3 + 2; 
+    const randomX = Math.random() * 100;
+    const randomY = Math.random() * 100;
+    const randomSize = Math.random() * 5 + 3;
+    const randomDuration = Math.random() * 3 + 2;
 
     sparkles.push({
       left: `${randomX}%`,
@@ -61,7 +61,6 @@ function SignIn(props) {
         overflow: "hidden",
       }}
     >
-
       {sparkles.map((style, index) => (
         <div
           key={index}
@@ -76,10 +75,10 @@ function SignIn(props) {
         />
       ))}
 
-
       <Paper
         elevation={3}
         sx={{
+          width: "60%",
           padding: "2rem",
           textAlign: "center",
           borderRadius: "16px",
@@ -89,18 +88,11 @@ function SignIn(props) {
           zIndex: 10,
         }}
       >
-        <Typography
-          variant="h4"
-          sx={{ marginBottom: "1rem", color: "#6d3b79", fontWeight: "bold" }}
-        >
-          Welcome to CalenDone
+        <Typography variant="h4" sx={{ marginBottom: "1rem", color: "#6d3b79", fontWeight: "bold" }}>
+          CalenDone
         </Typography>
-        <Typography
-          variant="body1"
-          fontStyle="italic"
-          sx={{ marginBottom: "1.5rem", color: "#333" }}
-        >
-          Connect your account to get started!
+        <Typography variant="body1" fontStyle="italic" sx={{ marginBottom: "1.5rem", color: "#333" }}>
+          Connect with your Google account to start!
         </Typography>
         <Button
           variant="contained"
@@ -143,4 +135,3 @@ function SignIn(props) {
 }
 
 export default SignIn;
-
