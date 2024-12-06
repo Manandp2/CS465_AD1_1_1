@@ -26,7 +26,13 @@ export default function EditDialog({
 }) {
   const [open, setOpen] = React.useState(false);
   const handleOpen = () => setOpen(true);
-  const handleClose = () => setOpen(false);
+  const handleClose = () => {
+    setNewDuration(duration);
+    setNewDueDate(dayjs(dueDate));
+    setNewTaskName(name);
+    setNewTaskDescription(description);
+    setOpen(false);
+  };
 
   const [newDuration, setNewDuration] = React.useState(duration);
   const [newDueDate, setNewDueDate] = React.useState(dayjs(dueDate));
@@ -123,6 +129,7 @@ export default function EditDialog({
               rows={8}
               fullWidth
               sx={{ marginBottom: 2 }}
+              value={newTaskDescription}
               onChange={(e) => setNewTaskDescription(e.target.value)}
             />
           </Stack>
