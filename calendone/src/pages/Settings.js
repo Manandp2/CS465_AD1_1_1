@@ -1,4 +1,5 @@
 import React from "react";
+import { useEffect } from "react";
 import Box from "@mui/material/Box";
 
 import Topbar from "../components/Topbar";
@@ -21,14 +22,36 @@ import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import { signOut } from "firebase/auth";
 import { Button } from "@mui/material";
 import { auth, db } from "../utils/firebase";
-import { doc, updateDoc, collection, setDoc } from "firebase/firestore";
+import { doc, updateDoc, collection, setDoc, getDoc } from "firebase/firestore";
 
-function WorkTimesAccordion({workTime, setWorkTime}) {
-    const [startTime, setStartTime] = React.useState(workTime.startTime);
-    const [endTime, setEndTime] = React.useState(workTime.endTime);
+function WorkTimesAccordion() {
+    const [startTime, setStartTime] = React.useState(dayjs());
+    const [endTime, setEndTime] = React.useState(dayjs());
+    useEffect(() => {
+        getDoc(
+            doc(db, "users", auth.currentUser.uid)
+          ).then((res) => {
+            const data = res.data();
+            setStartTime(dayjs(data.startTime.toDate()))
+            setEndTime(dayjs(data.endTime.toDate()))
+          }
+        )
+    }, [])
 
     const saveChanges = () => {
-        setWorkTime({startTime: startTime, endTime: endTime});
+        // Save worktime to firebase
+        const taskDocRef = doc(db, "users", auth.currentUser.uid);
+
+        setDoc(taskDocRef, {
+            startTime: startTime.toDate(),
+            endTime: endTime.toDate()
+        }, {merge:true})
+        .then(() => {
+            console.log("Worktime updated in Firestore");
+        })
+        .catch((error) => {
+            console.error("Error updating worktime: ", error);
+        });
     }
 
     return (
@@ -38,7 +61,7 @@ function WorkTimesAccordion({workTime, setWorkTime}) {
                     Work Time
                 </Typography>
                 <Typography sx={{ color: 'text.secondary' }}>
-                    {workTime.startTime.format('h:mmA') + " - " + workTime.endTime.format('h:mmA')}
+                    {startTime.format('h:mmA') + " - " + endTime.format('h:mmA')}
                 </Typography>
             </AccordionSummary>
             <AccordionDetails sx={{textAlign: "center"}}>
@@ -46,7 +69,7 @@ function WorkTimesAccordion({workTime, setWorkTime}) {
                     <FormControl sx={{ m: 1, minWidth: 120 }}>
                         <TimePicker 
                             label="Start Time"
-                            defaultValue={workTime.startTime}
+                            value={startTime}
                             onChange={(value) => setStartTime(value)}
                             maxTime={endTime}
                         />
@@ -54,7 +77,7 @@ function WorkTimesAccordion({workTime, setWorkTime}) {
                     <FormControl sx={{ m: 1, minWidth: 120 }}>
                         <TimePicker 
                             label="End Time" 
-                            defaultValue={workTime.endTime}
+                            value={endTime}
                             onChange={(value) => setEndTime(value)}
                             minTime={startTime}
                         />
@@ -140,16 +163,6 @@ export default function Settings({ setUser, setPage }) {
         });
     };
 
-    // Contains:
-    // startDate: dayjs
-    // endDate: dayjs
-    const [workTime, setWorkTime] = React.useState(
-        {
-            startTime: dayjs('2024-12-06T8:00'),
-            endTime: dayjs('2024-12-06T18:00')
-        }
-    );
-
     return (
         <div>
         <Paper square elevation={3} sx={{ backgroundColor: "white", color: "white", paddingY: "3%" }}>
@@ -161,7 +174,7 @@ export default function Settings({ setUser, setPage }) {
                 <Typography>Preferences</Typography>
             </AccordionSummary>
             <AccordionDetails>
-                <WorkTimesAccordion workTime={workTime} setWorkTime={setWorkTime} />
+                <WorkTimesAccordion />
             </AccordionDetails>
             </Accordion>
 

@@ -2,7 +2,9 @@ import React from "react";
 import { Button, Paper, Typography, Box } from "@mui/material";
 import { auth, db } from "../utils/firebase";
 import { signInWithPopup, GoogleAuthProvider } from "firebase/auth";
-import { doc, setDoc } from "firebase/firestore";
+import { collection, doc, setDoc, getDoc } from "firebase/firestore";
+
+import dayjs from 'dayjs';
 
 function generateSparkles(numSparkles) {
   const sparkles = [];
@@ -43,6 +45,23 @@ function SignIn(props) {
         ).then(() => {
           console.log("accessToken saved");
         });
+        getDoc(
+          doc(db, "users", result.user.uid)
+        ).then((res) => {
+          const data = res.data;
+          if (!data.startTime) {
+            setDoc(
+              doc(db, "users", result.user.uid),
+              {
+                startTime: dayjs('2024-12-06T8:00').toDate(),
+                endTime: dayjs('2024-12-06T18:00').toDate(),
+              },
+              { merge: true }
+            ).then(() => {
+              console.log("watchTime saved");
+            });
+          }
+        })
       })
       .catch((error) => {
         console.log(error);
