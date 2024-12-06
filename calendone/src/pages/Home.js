@@ -38,6 +38,7 @@ CustomTabPanel.propTypes = {
   value: PropTypes.number.isRequired,
 };
 export default function Home({setUser, setPage}) {
+export default function Home({ setUser, setPage }) {
   const SignOut = () => {
     signOut(auth)
     .then(() => {
@@ -48,11 +49,12 @@ export default function Home({setUser, setPage}) {
       console.log(error);
     });
   };
-  const [isSelected, setIsSelected] = useState(false);
-  // const [activeTabIndex, setActiveTabIndex] = useState(0);
 
   const [unscheduledTasks, setUnscheduledTasks] = useState([]);
   const [scheduledTasks, setScheduledTasks] = useState([]);
+  const [bottomBarStatus, setBottomBarStatus] = useState("Home");
+  const [unschedChecked, setUnschedChecked] = React.useState([]);
+  const [schedChecked, setSchedChecked] = React.useState([]);
 
   const getTasks = () => {
     const tasksCollectionRef = collection(db, "users", auth.currentUser.uid, "tasks");
@@ -86,10 +88,22 @@ export default function Home({setUser, setPage}) {
 
   useEffect(() => {
     getTasks();
-  }, [])
+  }, []);
 
-  const [unschedChecked, setUnschedChecked] = React.useState([]);
-  const [schedChecked, setSchedChecked] = React.useState([]);
+  useEffect(() => {
+    const sLen = schedChecked.length;
+    const uLen = unschedChecked.length;
+    if (sLen === 0 && uLen === 0) {
+      setBottomBarStatus("Home");
+    } else if (sLen === 0) {
+      setBottomBarStatus("HomeUnscheduled");
+    } else if (uLen === 0) {
+      setBottomBarStatus("HomeScheduled");
+    } else {
+      setBottomBarStatus("HomeMixed");
+    }
+    // console.log("BRUH", sLen, uLen);
+  }, [schedChecked, unschedChecked]);
 
   return (
     <div>
@@ -140,11 +154,12 @@ export default function Home({setUser, setPage}) {
           CalenDone
         </Typography>
       </Paper>
-      {unschedChecked.length === 0 && schedChecked.length === 0 ? (
-        <Bottombar status={"Home"} setPage={setPage} getTasks={getTasks}/>
+      {/* {unschedChecked.length === 0 && schedChecked.length === 0 ? (
+        <Bottombar status={"Home"} setPage={setPage} getTasks={getTasks} />
       ) : (
-        <Bottombar status={"Selected Home"} setPage={setPage}/>
-      )}
+        <Bottombar status={"Selected Home"} setPage={setPage} />
+      )} */}
+      <Bottombar status={bottomBarStatus} setPage={setPage} getTasks={getTasks} />
     </div>
   );
 }

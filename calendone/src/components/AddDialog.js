@@ -50,7 +50,7 @@ export default function AddDialog({getTasks}) {
   return (
     <div>
       <IconButton onClick={handleOpen} sx={{color: "white"}}>
-        <AddCircleOutlineIcon sx={{fontSize: "170%"}}/>
+        <AddCircleOutlineIcon sx={{fontSize: "250%"}}/>
       </IconButton>
       <Dialog
         fullWidth
@@ -101,12 +101,12 @@ export default function AddDialog({getTasks}) {
             />
             <Box>
               <FormControl fullWidth>
-                <InputLabel id="demo-simple-select-label">Duration</InputLabel>
+                <InputLabel id="demo-simple-select-label">Duration (mins)</InputLabel>
                 <Select
                   labelId="demo-simple-select-label"
                   id="demo-simple-select"
                   value={duration}
-                  label="Duration"
+                  label="Duration (mins)"
                   onChange={(e) => setDuration(e.target.value)}
                 >
                   <MenuItem value={5}>5</MenuItem>
