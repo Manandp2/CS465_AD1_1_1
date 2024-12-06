@@ -170,7 +170,7 @@ export default function Home({ setUser, setPage }) {
       </Paper>
       <Paper sx={{ overflowY: "scroll" }}>
         <Button onClick={SignOut}>Sign Out</Button>
-        <Accordion disableGutters>
+        <Accordion disableGutters defaultExpanded>
           <AccordionSummary expandIcon={<ArrowDropDownIcon />} aria-controls="panel1-content" id="panel1-header">
             <Checkbox
               edge="start"
@@ -194,7 +194,7 @@ export default function Home({ setUser, setPage }) {
             </Typography>
           </AccordionDetails>
         </Accordion>
-        <Accordion>
+        <Accordion defaultExpanded>
           <AccordionSummary expandIcon={<ArrowDropDownIcon />} aria-controls="panel2-content" id="panel2-header">
             <Checkbox
               edge="start"
