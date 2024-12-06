@@ -1,59 +1,70 @@
-import React from "react";
+import React, {useEffect} from "react";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
-import Typography from "@mui/material/Typography";
-import Modal from "@mui/material/Modal";
-import Paper from "@mui/material/Paper";
 import TextField from "@mui/material/TextField";
 import dayjs from "dayjs";
-import { MobileDateTimePicker } from "@mui/x-date-pickers/MobileDateTimePicker";
-import { DateTimePicker } from "@mui/x-date-pickers";
+import {MobileDateTimePicker} from "@mui/x-date-pickers/MobileDateTimePicker";
 import InputLabel from "@mui/material/InputLabel";
 import MenuItem from "@mui/material/MenuItem";
 import FormControl from "@mui/material/FormControl";
 import Select from "@mui/material/Select";
-import { Dialog, DialogActions, DialogContent, DialogTitle, IconButton, Stack } from "@mui/material";
-import { auth, db } from "../utils/firebase";
-import { collection, doc, setDoc } from "firebase/firestore";
-import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
+import {Dialog, DialogActions, DialogContent, DialogTitle, IconButton, Stack} from "@mui/material";
+import {auth, db} from "../utils/firebase";
+import {doc, updateDoc} from "firebase/firestore";
 import EditIcon from "@mui/icons-material/Edit";
 
-export default function EditDialog({ originalTaskName }) {
+export default function EditDialog({
+                                     name,
+                                     description,
+                                     dueDate,
+                                     duration,
+                                     isScheduled,
+                                     isComplete,
+                                     id,
+                                     getTasks,
+                                     gCalId
+                                   }) {
   const [open, setOpen] = React.useState(false);
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
 
-  const [duration, setDuration] = React.useState(5);
-  const [dueDate, setDueDate] = React.useState(dayjs());
-  const [taskName, setTaskName] = React.useState(originalTaskName);
-  const [taskDescription, setTaskDescription] = React.useState("");
+  const [newDuration, setNewDuration] = React.useState(duration);
+  const [newDueDate, setNewDueDate] = React.useState(dayjs(dueDate));
+  const [newTaskName, setNewTaskName] = React.useState(name);
+  const [newTaskDescription, setNewTaskDescription] = React.useState(description);
 
   const editTodoInFirestore = () => {
     console.log("EXECUTE EDIT");
-    // const dueDateAsDate = dueDate.toDate();
+    const tasksCollectionPath = `users/${auth.currentUser.uid}/tasks`;
+    const taskDocRef = doc(db, tasksCollectionPath, id); // 'id' is the document ID
+    const dueDateAsDate = newDueDate.toDate();
 
-    // const tasksCollectionRef = collection(db, "users", auth.currentUser.uid, "tasks");
-    // const taskDocRef = doc(tasksCollectionRef);
-
-    // setDoc(taskDocRef, {
-    //   name: taskName,
-    //   description: taskDescription,
-    //   dueDate: dueDateAsDate,
-    //   duration: Number(duration),
-    //   isComplete: false,
-    // })
-    //   .then(() => {
-    //     console.log("Task added to Firestore");
-    //   })
-    //   .catch((error) => {
-    //     console.error("Error adding task: ", error);
-    //   });
+    updateDoc(taskDocRef, {
+      name: newTaskName,
+      description: newTaskDescription,
+      dueDate: dueDateAsDate,
+      duration: Number(newDuration),
+      isComplete: isComplete,
+      isScheduled: isScheduled,
+      gCalId: gCalId,
+    })
+    .then(() => {
+      console.log("Task updated in Firestore");
+      getTasks();
+    })
+    .catch((error) => {
+      console.error("Error updating task: ", error);
+    });
   };
+  useEffect(() => {
+    console.log("dueDate: " + dueDate);
+    console.log("newDueDate: " + newDueDate);
+  }, [])
 
   return (
     <div>
       <IconButton onClick={handleOpen} edge="end" aria-label="comments">
-        <EditIcon />
+        <EditIcon/>
       </IconButton>
       <Dialog
         fullWidth
@@ -68,23 +79,8 @@ export default function EditDialog({ originalTaskName }) {
           },
         }}
       >
-        {/* <Paper
-          elevation={3}
-          sx={{
-            position: "absolute",
-            top: "50%",
-            left: "50%",
-            transform: "translate(-50%, -50%)",
-            width: "70%",
-            height: "70%",
-            textAlign: "left",
-            padding: 4,
-            overflowY: "auto",
-          }}
-        > */}
-
         {/* Title */}
-        <DialogTitle>Edit {taskName}</DialogTitle>
+        <DialogTitle>Edit {newTaskName}</DialogTitle>
         <DialogContent>
           <Stack spacing={3} paddingTop={1}>
             {/* Task Name */}
@@ -93,15 +89,15 @@ export default function EditDialog({ originalTaskName }) {
               label="Task Name"
               variant="outlined"
               fullWidth
-              value={taskName}
-              onChange={(e) => setTaskName(e.target.value)}
+              value={newTaskName}
+              onChange={(e) => setNewTaskName(e.target.value)}
             />
 
             <MobileDateTimePicker
               label="Due Date"
-              value={dueDate}
-              onChange={(newValue) => setDueDate(newValue)}
-              sx={{ width: "100%" }}
+              value={newDueDate}
+              onChange={(newValue) => setNewDueDate(newValue)}
+              sx={{width: "100%"}}
             />
             <Box>
               <FormControl fullWidth>
@@ -109,9 +105,9 @@ export default function EditDialog({ originalTaskName }) {
                 <Select
                   labelId="demo-simple-select-label"
                   id="demo-simple-select"
-                  value={duration}
+                  value={newDuration}
                   label="Duration"
-                  onChange={(e) => setDuration(e.target.value)}
+                  onChange={(e) => setNewDuration(e.target.value)}
                 >
                   <MenuItem value={5}>5</MenuItem>
                   <MenuItem value={15}>15</MenuItem>
@@ -131,8 +127,8 @@ export default function EditDialog({ originalTaskName }) {
               multiline
               rows={8}
               fullWidth
-              sx={{ marginBottom: 2 }}
-              onChange={(e) => setTaskDescription(e.target.value)}
+              sx={{marginBottom: 2}}
+              onChange={(e) => setNewTaskDescription(e.target.value)}
             />
           </Stack>
         </DialogContent>
