@@ -2,7 +2,7 @@ import React from "react";
 import { Button, Paper, Typography, Box } from "@mui/material";
 import { auth, db } from "../utils/firebase";
 import { signInWithPopup, GoogleAuthProvider } from "firebase/auth";
-import { collection, doc, setDoc, getDoc } from "firebase/firestore";
+import { doc, setDoc, getDoc } from "firebase/firestore";
 
 import dayjs from 'dayjs';
 
@@ -48,7 +48,7 @@ function SignIn(props) {
         getDoc(
           doc(db, "users", result.user.uid)
         ).then((res) => {
-          const data = res.data;
+          const data = res.data();
           if (!data.startTime) {
             setDoc(
               doc(db, "users", result.user.uid),
