@@ -2,6 +2,8 @@
 
 ## Quick Start
 To compile on your local machine, try running these commands in the terminal within src/calendone:
-- npm install
-- npm start
-
+```shell
+cd calendone
+npm install
+npm start
+```
