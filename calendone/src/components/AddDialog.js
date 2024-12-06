@@ -3,14 +3,14 @@ import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
 import dayjs from "dayjs";
-import { MobileDateTimePicker } from "@mui/x-date-pickers/MobileDateTimePicker";
+import {MobileDateTimePicker} from "@mui/x-date-pickers/MobileDateTimePicker";
 import InputLabel from "@mui/material/InputLabel";
 import MenuItem from "@mui/material/MenuItem";
 import FormControl from "@mui/material/FormControl";
 import Select from "@mui/material/Select";
-import { Dialog, DialogActions, DialogContent, DialogTitle, IconButton, Stack } from "@mui/material";
-import { auth, db } from "../utils/firebase";
-import { collection, doc, setDoc } from "firebase/firestore";
+import {Dialog, DialogActions, DialogContent, DialogTitle, IconButton, Stack} from "@mui/material";
+import {auth, db} from "../utils/firebase";
+import {collection, doc, setDoc} from "firebase/firestore";
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 
 export default function AddDialog({getTasks}) {
@@ -36,20 +36,21 @@ export default function AddDialog({getTasks}) {
       duration: Number(duration),
       isComplete: false,
       isScheduled: false,
+      gCalId: null,
     })
-      .then(() => {
-        console.log("Task added to Firestore");
-        getTasks();
-      })
-      .catch((error) => {
-        console.error("Error adding task: ", error);
-      });
+    .then(() => {
+      console.log("Task added to Firestore");
+      getTasks();
+    })
+    .catch((error) => {
+      console.error("Error adding task: ", error);
+    });
   };
 
   return (
     <div>
-      <IconButton onClick={handleOpen} sx={{ color: "white" }}>
-        <AddCircleOutlineIcon sx={{ fontSize: "170%" }} />
+      <IconButton onClick={handleOpen} sx={{color: "white"}}>
+        <AddCircleOutlineIcon sx={{fontSize: "170%"}}/>
       </IconButton>
       <Dialog
         fullWidth
@@ -96,7 +97,7 @@ export default function AddDialog({getTasks}) {
               label="Due Date"
               value={dueDate}
               onChange={(newValue) => setDueDate(newValue)}
-              sx={{ width: "100%" }}
+              sx={{width: "100%"}}
             />
             <Box>
               <FormControl fullWidth>
@@ -126,7 +127,7 @@ export default function AddDialog({getTasks}) {
               multiline
               rows={8}
               fullWidth
-              sx={{ marginBottom: 2 }}
+              sx={{marginBottom: 2}}
               onChange={(e) => setTaskDescription(e.target.value)}
             />
           </Stack>
