@@ -1,29 +1,29 @@
-import React, {useEffect} from "react";
+import React, { useEffect } from "react";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
 import dayjs from "dayjs";
-import {MobileDateTimePicker} from "@mui/x-date-pickers/MobileDateTimePicker";
+import { MobileDateTimePicker } from "@mui/x-date-pickers/MobileDateTimePicker";
 import InputLabel from "@mui/material/InputLabel";
 import MenuItem from "@mui/material/MenuItem";
 import FormControl from "@mui/material/FormControl";
 import Select from "@mui/material/Select";
-import {Dialog, DialogActions, DialogContent, DialogTitle, IconButton, Stack} from "@mui/material";
-import {auth, db} from "../utils/firebase";
-import {doc, updateDoc} from "firebase/firestore";
+import { Dialog, DialogActions, DialogContent, DialogTitle, IconButton, Stack } from "@mui/material";
+import { auth, db } from "../utils/firebase";
+import { doc, updateDoc } from "firebase/firestore";
 import EditIcon from "@mui/icons-material/Edit";
 
 export default function EditDialog({
-                                     name,
-                                     description,
-                                     dueDate,
-                                     duration,
-                                     isScheduled,
-                                     isComplete,
-                                     id,
-                                     getTasks,
-                                     gCalId
-                                   }) {
+  name,
+  description,
+  dueDate,
+  duration,
+  isScheduled,
+  isComplete,
+  id,
+  getTasks,
+  gCalId,
+}) {
   const [open, setOpen] = React.useState(false);
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
@@ -48,23 +48,23 @@ export default function EditDialog({
       isScheduled: isScheduled,
       gCalId: gCalId,
     })
-    .then(() => {
-      console.log("Task updated in Firestore");
-      getTasks();
-    })
-    .catch((error) => {
-      console.error("Error updating task: ", error);
-    });
+      .then(() => {
+        console.log("Task updated in Firestore");
+        getTasks();
+      })
+      .catch((error) => {
+        console.error("Error updating task: ", error);
+      });
   };
   useEffect(() => {
     console.log("dueDate: " + dueDate);
     console.log("newDueDate: " + newDueDate);
-  }, [])
+  }, []);
 
   return (
     <div>
-      <IconButton onClick={handleOpen} edge="end" aria-label="comments">
-        <EditIcon/>
+      <IconButton onClick={handleOpen} edge="end" aria-label="comments" sx={{ paddingRight: 3 }}>
+        <EditIcon />
       </IconButton>
       <Dialog
         fullWidth
@@ -97,7 +97,7 @@ export default function EditDialog({
               label="Due Date"
               value={newDueDate}
               onChange={(newValue) => setNewDueDate(newValue)}
-              sx={{width: "100%"}}
+              sx={{ width: "100%" }}
             />
             <Box>
               <FormControl fullWidth>
@@ -127,7 +127,7 @@ export default function EditDialog({
               multiline
               rows={8}
               fullWidth
-              sx={{marginBottom: 2}}
+              sx={{ marginBottom: 2 }}
               onChange={(e) => setNewTaskDescription(e.target.value)}
             />
           </Stack>
