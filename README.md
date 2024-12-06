@@ -7,3 +7,5 @@ cd calendone
 npm install
 npm start
 ```
+
+Make sure to run in Chrome Devtools on a phone resolution (ex. iPhone XR or Samsung Galaxy S8+) for the intended experience.
