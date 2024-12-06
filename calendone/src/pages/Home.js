@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from "react";
+import React, { useEffect, useState } from "react";
 
 import Bottombar from "../components/Bottombar";
 import TaskList from "../components/TaskList";
@@ -8,14 +8,14 @@ import AccordionSummary from "@mui/material/AccordionSummary";
 import AccordionDetails from "@mui/material/AccordionDetails";
 import Typography from "@mui/material/Typography";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
-import {Button, Checkbox, Paper} from "@mui/material";
+import { Button, Checkbox, Paper } from "@mui/material";
 
-import {auth, db} from "../utils/firebase";
-import {collection, doc, getDoc, getDocs, writeBatch} from "firebase/firestore";
+import { auth, db } from "../utils/firebase";
+import { collection, doc, getDoc, getDocs, writeBatch } from "firebase/firestore";
 import RecapDialog from "../components/RecapDialog";
-import {gapi} from "gapi-script";
+import { gapi } from "gapi-script";
 
-export default function Home({setPage}) {
+export default function Home({ setPage }) {
   const [unscheduledTasks, setUnscheduledTasks] = useState([]);
   const [scheduledTasks, setScheduledTasks] = useState([]);
   const [bottomBarStatus, setBottomBarStatus] = useState("Home");
@@ -37,7 +37,7 @@ export default function Home({setPage}) {
 
     unschedChecked.forEach((task) => {
       const taskDocRef = doc(db, tasksCollectionPath, task); // Create a reference to the document
-      batch.update(taskDocRef, {isScheduled: true}); // Add the update operation to the batch
+      batch.update(taskDocRef, { isScheduled: true }); // Add the update operation to the batch
     });
 
     batch.commit().then(() => {
@@ -53,7 +53,7 @@ export default function Home({setPage}) {
 
     schedChecked.forEach((task) => {
       const taskDocRef = doc(db, tasksCollectionPath, task); // Create a reference to the document
-      batch.update(taskDocRef, {isScheduled: false}); // Add the update operation to the batch
+      batch.update(taskDocRef, { isScheduled: false }); // Add the update operation to the batch
     });
 
     batch.commit().then(() => {
@@ -69,12 +69,12 @@ export default function Home({setPage}) {
 
     schedChecked.forEach((task) => {
       const taskDocRef = doc(db, tasksCollectionPath, task); // Create a reference to the document
-      batch.update(taskDocRef, {isComplete: true}); // Add the update operation to the batch
+      batch.update(taskDocRef, { isComplete: true }); // Add the update operation to the batch
     });
 
     unschedChecked.forEach((task) => {
       const taskDocRef = doc(db, tasksCollectionPath, task); // Create a reference to the document
-      batch.update(taskDocRef, {isComplete: true}); // Add the update operation to the batch
+      batch.update(taskDocRef, { isComplete: true }); // Add the update operation to the batch
     });
 
     batch.commit().then(() => {
@@ -87,41 +87,40 @@ export default function Home({setPage}) {
   const getTasks = () => {
     const tasksCollectionRef = collection(db, "users", auth.currentUser.uid, "tasks");
     getDocs(tasksCollectionRef)
-    .then((querySnapshot) => {
-      setUnscheduledTasks([]);
-      setScheduledTasks([]);
-      querySnapshot.forEach((doc) => {
-        const task = doc.data();
-        const fullTask = {
-          name: task.name,
-          description: task.description,
-          dueDate: task.dueDate.toDate(),
-          duration: task.duration,
-          isScheduled: task.isScheduled,
-          isComplete: task.isComplete,
-          id: doc.id,
-          gCalId: task.gCalId,
-        };
-        if (task.isScheduled && !task.isComplete) {
-          setScheduledTasks((prev) => [...prev, fullTask]);
-        } else if (!task.isScheduled && !task.isComplete) {
-          setUnscheduledTasks((prev) => [...prev, fullTask]);
-        }
+      .then((querySnapshot) => {
+        setUnscheduledTasks([]);
+        setScheduledTasks([]);
+        querySnapshot.forEach((doc) => {
+          const task = doc.data();
+          const fullTask = {
+            name: task.name,
+            description: task.description,
+            dueDate: task.dueDate.toDate(),
+            duration: task.duration,
+            isScheduled: task.isScheduled,
+            isComplete: task.isComplete,
+            id: doc.id,
+            gCalId: task.gCalId,
+          };
+          if (task.isScheduled && !task.isComplete) {
+            setScheduledTasks((prev) => [...prev, fullTask]);
+          } else if (!task.isScheduled && !task.isComplete) {
+            setUnscheduledTasks((prev) => [...prev, fullTask]);
+          }
+        });
+      })
+      .catch((error) => {
+        console.log(error);
       });
-    })
-    .catch((error) => {
-      console.log(error);
-    });
   };
 
   const getAccessToken = () => {
     const docRef = doc(db, "users", auth.currentUser.uid);
-    getDoc(docRef)
-    .then((doc) => {
+    getDoc(docRef).then((doc) => {
       const data = doc.data();
       setAccessToken(data.accessToken);
-    })
-  }
+    });
+  };
 
   useEffect(() => {
     getTasks();
@@ -168,60 +167,73 @@ export default function Home({setPage}) {
   const getGoogleCalendarEvents = () => {
     gapi.load("client:auth2", () => {
       gapi.client
-      .init({
-        apiKey: "AIzaSyDZYd2i-rX4oN_7i2AeSwGeJ0Uq2jo_Rng",
-        clientId: "614127097265-pdklurnj0e83fnd2m6s797gq67c1u4aq.apps.googleusercontent.com",
-        discoveryDocs: ["https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest"],
-        scope: "https://www.googleapis.com/auth/calendar",
-      })
-      .then(() => {
-        gapi.auth.setToken({access_token: accessToken});
+        .init({
+          apiKey: "AIzaSyDZYd2i-rX4oN_7i2AeSwGeJ0Uq2jo_Rng",
+          clientId: "614127097265-pdklurnj0e83fnd2m6s797gq67c1u4aq.apps.googleusercontent.com",
+          discoveryDocs: ["https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest"],
+          scope: "https://www.googleapis.com/auth/calendar",
+        })
+        .then(() => {
+          gapi.auth.setToken({ access_token: accessToken });
 
-        gapi.client.calendar.calendarList.list()
-        .then((response) => {
-          const calendars = response.result.items;
-          if (calendars.length > 0) {
-            calendars.forEach((calendar) => {
-              const calendarId = calendar.id;
+          gapi.client.calendar.calendarList
+            .list()
+            .then((response) => {
+              const calendars = response.result.items;
+              if (calendars.length > 0) {
+                calendars.forEach((calendar) => {
+                  const calendarId = calendar.id;
 
-              // Retrieve events for each calendar
-              gapi.client.calendar.events.list({
-                calendarId: calendarId,
-                timeMin: new Date().toISOString(),
-                timeMax: new Date(new Date().setDate(new Date().getDate() + 7)).toISOString(),
-                singleEvents: true,
-                orderBy: 'startTime'
-              })
-              .then((resp) => {
-                const events = resp.result.items;
-                events.forEach((event) => {
-                  if (event.start.dateTime && event.end.dateTime) { // not a whole-day event
-                    setEventsFromCalendar((prev) => [...prev, {calendar: calendar.summary,start: new Date(event.start.dateTime), end: new Date(event.end.dateTime)}])
-                  }
-                })
-              })
-              .catch((error) => {
-                console.error(`Error fetching events from calendar ${calendar.summary}:`, error);
-              });
+                  // Retrieve events for each calendar
+                  gapi.client.calendar.events
+                    .list({
+                      calendarId: calendarId,
+                      timeMin: new Date().toISOString(),
+                      timeMax: new Date(new Date().setDate(new Date().getDate() + 7)).toISOString(),
+                      singleEvents: true,
+                      orderBy: "startTime",
+                    })
+                    .then((resp) => {
+                      const events = resp.result.items;
+                      events.forEach((event) => {
+                        if (event.start.dateTime && event.end.dateTime) {
+                          // not a whole-day event
+                          console.log(new Date(event.start.dateTime));
+                          console.log(event.end.dateTime);
+                          setEventsFromCalendar((prev) => [
+                            ...prev,
+                            {
+                              calendar: calendar.summary,
+                              start: new Date(event.start.dateTime),
+                              end: new Date(event.end.dateTime),
+                            },
+                          ]);
+                        }
+                      });
+                    })
+                    .catch((error) => {
+                      console.error(`Error fetching events from calendar ${calendar.summary}:`, error);
+                    });
+                });
+              }
+            })
+            .catch((error) => {
+              console.error("Error fetching calendars:", error);
             });
-          }
-        }).catch((error) => {
-          console.error('Error fetching calendars:', error);
         });
-      });
     });
-  }
+  };
 
   return (
     <div>
-      <RecapDialog open={newCompletedExist} setOpen={setNewCompletedExist}/>
-      <Paper square elevation={3} sx={{backgroundColor: "white", color: "white", paddingY: "3%"}}>
+      <RecapDialog open={newCompletedExist} setOpen={setNewCompletedExist} />
+      <Paper square elevation={3} sx={{ backgroundColor: "white", color: "white", paddingY: "3%" }}>
         <Typography variant="h4">PLACEHOLDER</Typography>
       </Paper>
-      <Paper square elevation={0} sx={{overflowY: "scroll"}}>
+      <Paper square elevation={0} sx={{ overflowY: "scroll" }}>
         <Button onClick={getGoogleCalendarEvents}>Get events</Button>
         <Accordion disableGutters defaultExpanded>
-          <AccordionSummary expandIcon={<ArrowDropDownIcon/>} aria-controls="panel1-content" id="panel1-header">
+          <AccordionSummary expandIcon={<ArrowDropDownIcon />} aria-controls="panel1-content" id="panel1-header">
             <Checkbox
               edge="start"
               onClick={(e) => {
@@ -231,9 +243,9 @@ export default function Home({setPage}) {
               checked={allUnschedChecked}
               disabled={unscheduledTasks.length === 0}
             />
-            <Typography sx={{display: "flex", alignItems: "center"}}>Unscheduled Tasks</Typography>
+            <Typography sx={{ display: "flex", alignItems: "center" }}>Unscheduled Tasks</Typography>
           </AccordionSummary>
-          <AccordionDetails sx={{paddingX: "0"}}>
+          <AccordionDetails sx={{ paddingX: "0" }}>
             <Typography>
               <TaskList
                 taskList={unscheduledTasks}
@@ -245,7 +257,7 @@ export default function Home({setPage}) {
           </AccordionDetails>
         </Accordion>
         <Accordion defaultExpanded>
-          <AccordionSummary expandIcon={<ArrowDropDownIcon/>} aria-controls="panel2-content" id="panel2-header">
+          <AccordionSummary expandIcon={<ArrowDropDownIcon />} aria-controls="panel2-content" id="panel2-header">
             <Checkbox
               edge="start"
               onClick={(e) => {
@@ -255,9 +267,9 @@ export default function Home({setPage}) {
               checked={allSchedChecked}
               disabled={scheduledTasks.length === 0}
             />
-            <Typography sx={{display: "flex", alignItems: "center"}}>Scheduled Tasks</Typography>
+            <Typography sx={{ display: "flex", alignItems: "center" }}>Scheduled Tasks</Typography>
           </AccordionSummary>
-          <AccordionDetails sx={{paddingX: "0"}}>
+          <AccordionDetails sx={{ paddingX: "0" }}>
             <Typography>
               <TaskList
                 taskList={scheduledTasks}
@@ -284,7 +296,7 @@ export default function Home({setPage}) {
           right: 0,
         }}
       >
-        <Typography variant="h4" sx={{textAlign: "center"}}>
+        <Typography variant="h4" sx={{ textAlign: "center" }}>
           CalenDone
         </Typography>
       </Paper>
