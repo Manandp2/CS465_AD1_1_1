@@ -1,4 +1,5 @@
 import React from "react";
+import { useEffect } from "react";
 import Box from "@mui/material/Box";
 
 import Topbar from "../components/Topbar";
@@ -21,55 +22,80 @@ import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 import { signOut } from "firebase/auth";
 import { Button } from "@mui/material";
 import { auth, db } from "../utils/firebase";
-import { doc, collection, setDoc } from "firebase/firestore";
 
-function WorkTimesAccordion({ workTime, setWorkTime }) {
-  const [startTime, setStartTime] = React.useState(workTime.startTime);
-  const [endTime, setEndTime] = React.useState(workTime.endTime);
+import { doc, updateDoc, collection, setDoc, getDoc } from "firebase/firestore";
 
-  const saveChanges = () => {
-    setWorkTime({ startTime: startTime, endTime: endTime });
-  };
+function WorkTimesAccordion() {
+    const [startTime, setStartTime] = React.useState(dayjs());
+    const [endTime, setEndTime] = React.useState(dayjs());
+    useEffect(() => {
+        getDoc(
+            doc(db, "users", auth.currentUser.uid)
+          ).then((res) => {
+            const data = res.data();
+            setStartTime(dayjs(data.startTime.toDate()))
+            setEndTime(dayjs(data.endTime.toDate()))
+          }
+        )
+    }, [])
 
-  return (
-    <Accordion disableGutters defaultExpanded>
-      <AccordionSummary expandIcon={<ArrowDropDownIcon />}>
-        <Typography sx={{ width: "33%", flexShrink: 0 }}>Work Time</Typography>
-        <Typography sx={{ color: "text.secondary" }}>
-          {workTime.startTime.format("h:mmA") + " - " + workTime.endTime.format("h:mmA")}
-        </Typography>
-      </AccordionSummary>
-      <AccordionDetails sx={{ textAlign: "center" }}>
-        <Box component="form" sx={{ display: "flex", flexWrap: "wrap" }}>
-          <FormControl sx={{ m: 1, minWidth: 120 }}>
-            <TimePicker
-              label="Start Time"
-              defaultValue={workTime.startTime}
-              onChange={(value) => setStartTime(value)}
-              maxTime={endTime}
-            />
-          </FormControl>
-          <FormControl sx={{ m: 1, minWidth: 120 }}>
-            <TimePicker
-              label="End Time"
-              defaultValue={workTime.endTime}
-              onChange={(value) => setEndTime(value)}
-              minTime={startTime}
-            />
-          </FormControl>
-          <FormControl sx={{ m: 1, minWidth: 120 }}>
-            <Button
-              variant="contained"
-              sx={{ textTransform: "None", backgroundColor: "#6d3b79" }}
-              onClick={saveChanges}
-            >
-              <Typography>Save Changes</Typography>
-            </Button>
-          </FormControl>
-        </Box>
-      </AccordionDetails>
-    </Accordion>
-  );
+    const saveChanges = () => {
+        // Save worktime to firebase
+        const taskDocRef = doc(db, "users", auth.currentUser.uid);
+
+        setDoc(taskDocRef, {
+            startTime: startTime.toDate(),
+            endTime: endTime.toDate()
+        }, {merge:true})
+        .then(() => {
+            console.log("Worktime updated in Firestore");
+        })
+        .catch((error) => {
+            console.error("Error updating worktime: ", error);
+        });
+    }
+
+    return (
+        <Accordion disableGutters defaultExpanded>
+            <AccordionSummary expandIcon={<ArrowDropDownIcon />} aria-controls="panel1-1-content" id="panel1-1-header">
+                <Typography sx={{ width: '33%', flexShrink: 0 }}>
+                    Work Time
+                </Typography>
+                <Typography sx={{ color: 'text.secondary' }}>
+                    {startTime.format('h:mmA') + " - " + endTime.format('h:mmA')}
+                </Typography>
+            </AccordionSummary>
+            <AccordionDetails sx={{textAlign: "center"}}>
+                <Box component="form" sx={{ display: 'flex', flexWrap: 'wrap' }}>
+                    <FormControl sx={{ m: 1, minWidth: 120 }}>
+                        <TimePicker 
+                            label="Start Time"
+                            value={startTime}
+                            onChange={(value) => setStartTime(value)}
+                            maxTime={endTime}
+                        />
+                    </FormControl>
+                    <FormControl sx={{ m: 1, minWidth: 120 }}>
+                        <TimePicker 
+                            label="End Time" 
+                            value={endTime}
+                            onChange={(value) => setEndTime(value)}
+                            minTime={startTime}
+                        />
+                    </FormControl>
+                    <FormControl sx={{ m: 1, minWidth: 120 }}>
+                        <Button 
+                            variant="contained"
+                            sx={{textTransform: "None", backgroundColor: "#6d3b79"}}
+                            onClick={saveChanges}
+                        >
+                            <Typography>Save Changes</Typography>
+                        </Button>
+                    </FormControl>
+                </Box>
+            </AccordionDetails>
+        </Accordion>
+    )
 }
 
 function GoogleAccordion() {
@@ -114,59 +140,51 @@ function AccountAccordion({ SignOut }) {
 }
 
 export default function Settings({ setUser, setPage }) {
-  // const [activeTabIndex, setActiveTabIndex] = useState(0);
+    // const [activeTabIndex, setActiveTabIndex] = useState(0);
 
-  const addTodoToFirestore = () => {
-    const tasksCollectionRef = collection(db, "users", auth.currentUser.uid, "tasks");
-    const taskDocRef = doc(tasksCollectionRef);
-    setDoc(taskDocRef, { name: "Task 1", description: "Description 1", dueDate: "2022-12-31", isComplete: false })
-      .then(() => {
-        console.log("Task added to Firestore");
-      })
-      .catch((error) => {
-        console.log(error);
-      });
-  };
-  const SignOut = () => {
-    signOut(auth)
-      .then(() => {
-        console.log("Signed out");
-        setUser(null);
-      })
-      .catch((error) => {
-        console.log(error);
-      });
-  };
+    const addTodoToFirestore = () => {
+        const tasksCollectionRef = collection(db, "users", auth.currentUser.uid, "tasks");
+        const taskDocRef = doc(tasksCollectionRef);
+        setDoc(taskDocRef, { name: "Task 1", description: "Description 1", dueDate: "2022-12-31", isComplete: false })
+        .then(() => {
+            console.log("Task added to Firestore");
+        })
+        .catch((error) => {
+            console.log(error);
+        });
+    };
+    const SignOut = () => {
+        signOut(auth)
+        .then(() => {
+            console.log("Signed out");
+            setUser(null);
+        })
+        .catch((error) => {
+            console.log(error);
+        });
+    };
 
-  // Contains:
-  // startDate: dayjs
-  // endDate: dayjs
-  const [workTime, setWorkTime] = React.useState({
-    startTime: dayjs("2024-12-06T8:00"),
-    endTime: dayjs("2024-12-06T18:00"),
-  });
+    return (
+        <div>
+        <Paper square elevation={3} sx={{ backgroundColor: "white", color: "white", paddingY: "3%" }}>
+            <Typography variant="h4">PLACEHOLDER</Typography>
+        </Paper>
+        <Paper sx={{ overflowY: "scroll" }}>
+            <Accordion disableGutters defaultExpanded>
+            <AccordionSummary expandIcon={<ArrowDropDownIcon />} aria-controls="panel1-content" id="panel1-header">
+                <Typography>Preferences</Typography>
+            </AccordionSummary>
+            <AccordionDetails>
+                <WorkTimesAccordion />
+            </AccordionDetails>
+            </Accordion>
 
-  return (
-    <div>
-      <Paper square elevation={3} sx={{ backgroundColor: "white", color: "white", paddingY: "3%" }}>
-        <Typography variant="h4">PLACEHOLDER</Typography>
-      </Paper>
-      <Paper sx={{ overflowY: "scroll" }}>
-        <Accordion disableGutters defaultExpanded>
-          <AccordionSummary expandIcon={<ArrowDropDownIcon />} aria-controls="panel1-content" id="panel1-header">
-            <Typography>Preferences</Typography>
-          </AccordionSummary>
-          <AccordionDetails>
-            <WorkTimesAccordion workTime={workTime} setWorkTime={setWorkTime} />
-          </AccordionDetails>
-        </Accordion>
+            <GoogleAccordion />
+            <AccountAccordion SignOut={SignOut} />
+        </Paper>
 
-        <GoogleAccordion />
-        <AccountAccordion SignOut={SignOut} />
-      </Paper>
-
-      <Topbar header={"Settings"} />
-      <Bottombar status={"Settings"} setPage={setPage} />
-    </div>
-  );
+        <Topbar header={"Settings"} />
+        <Bottombar status={"Settings"} setPage={setPage} />
+        </div>
+    );
 }
