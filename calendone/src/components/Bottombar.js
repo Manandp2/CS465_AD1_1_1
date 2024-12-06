@@ -17,12 +17,14 @@ import EventBusyIcon from "@mui/icons-material/EventBusy";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 
 import {auth, db} from "../utils/firebase";
-import {collection, doc, deleteDoc} from "firebase/firestore";
+import {doc, deleteDoc} from "firebase/firestore";
 
 export default function Bottombar({ status, setPage, getTasks, 
                                     scheduleTasks, unscheduleTasks,
                                     unSchedChecked, setUnschedChecked,
-                                    schedChecked, setSchedChecked }) {
+                                    schedChecked, setSchedChecked,
+                                    unCompleteTasks, deleteCompletedTasks,
+                                    completeTasks }) {
   let selectedList;
   switch(status) {
     case "HomeUnscheduled":
@@ -119,7 +121,7 @@ export default function Bottombar({ status, setPage, getTasks,
                 <CalendarTodayIcon disabled sx={{ fontSize: "250%" }} />
               </IconButton>
             )}
-            <IconButton sx={{ color: "white" }}>
+            <IconButton sx={{ color: "white" }} onClick={completeTasks}>
               <DoneAllIcon sx={{ fontSize: "170%" }} />
             </IconButton>
           </>
@@ -139,10 +141,10 @@ export default function Bottombar({ status, setPage, getTasks,
         )}
         {status === "Selected Completed" && (
           <>
-            <IconButton sx={{ color: "white" }}>
+            <IconButton sx={{ color: "white" }} onClick={deleteCompletedTasks}>
               <DeleteIcon sx={{ fontSize: "170%" }} />
             </IconButton>
-            <IconButton sx={{ color: "white" }}>
+            <IconButton sx={{ color: "white" }} onClick={unCompleteTasks}>
               <RemoveDoneIcon sx={{ fontSize: "250%" }} />
             </IconButton>
             <IconButton sx={{ color: "white" }} onClick={() => setPage("Home")}>

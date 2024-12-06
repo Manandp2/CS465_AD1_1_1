@@ -14,7 +14,7 @@ import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 import { Paper } from "@mui/material";
 
 import { auth, db } from "../utils/firebase";
-import { collection, getDocs } from "firebase/firestore";
+import {collection, doc, getDocs, writeBatch} from "firebase/firestore";
 
 function CustomTabPanel(props) {
   const { children, value, index, ...other } = props;
@@ -71,6 +71,38 @@ export default function Completed({ setPage }) {
       });
   };
 
+  const unCompleteTasks = () => {
+    const batch = writeBatch(db);  // Create a new batch instance
+    const tasksCollectionPath = `users/${auth.currentUser.uid}/tasks`;
+
+    completedChecked.forEach((task) => {
+      const taskDocRef = doc(db, tasksCollectionPath, task); // Create a reference to the document
+      batch.update(taskDocRef, { isComplete: false, isScheduled: false }); // Add the update operation to the batch
+    });
+
+    batch.commit()
+    .then(() => {
+      setCompletedChecked([]);
+      getTasks();
+    })
+  }
+
+  const deleteTasksFromFirestore = () => {
+    const batch = writeBatch(db);  // Create a new batch instance
+    const tasksCollectionPath = `users/${auth.currentUser.uid}/tasks`;
+
+    completedChecked.forEach((task) => {
+      const taskDocRef = doc(db, tasksCollectionPath, task); // Create a reference to the document
+      batch.delete(taskDocRef); // Add the update operation to the batch
+    });
+
+    batch.commit()
+    .then(() => {
+      setCompletedChecked([]);
+      getTasks();
+    })
+  }
+
   useEffect(() => {
     getTasks();
   }, []);
@@ -101,7 +133,7 @@ export default function Completed({ setPage }) {
       {completedChecked.length === 0 ? (
         <Bottombar status={"Completed"} setPage={setPage} />
       ) : (
-        <Bottombar status={"Selected Completed"} setPage={setPage} />
+        <Bottombar status={"Selected Completed"} setPage={setPage} unCompleteTasks={unCompleteTasks} deleteCompletedTasks={deleteTasksFromFirestore}/>
       )}
     </div>
   );
