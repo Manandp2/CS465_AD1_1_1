@@ -7,7 +7,7 @@ import ListItemText from "@mui/material/ListItemText";
 import Checkbox from "@mui/material/Checkbox";
 import EditDialog from "./EditDialog";
 
-export default function TaskList({taskList, checked, setChecked, getTasks}) {
+export default function TaskList({ taskList, checked, setChecked, getTasks }) {
   // const [checked, setChecked] = React.useState([0]);
 
   const handleToggle = (value) => () => {
@@ -29,17 +29,8 @@ export default function TaskList({taskList, checked, setChecked, getTasks}) {
   // }
 
   return (
-    <List sx={{width: "100%", bgcolor: "background.paper"}}>
-      {taskList.map(({
-                       name,
-                       description,
-                       dueDate,
-                       duration,
-                       isScheduled,
-                       isComplete,
-                       id,
-                       gCalId
-                     }) => {
+    <List sx={{ width: "100%", bgcolor: "background.paper" }}>
+      {taskList.map(({ name, description, dueDate, duration, isScheduled, isComplete, id, gCalId }) => {
         const labelId = `checkbox-list-label-${id}`;
         return (
           <ListItem
@@ -48,9 +39,17 @@ export default function TaskList({taskList, checked, setChecked, getTasks}) {
               // <IconButton edge="end" aria-label="comments">
               //   <EditIcon/>
               // </IconButton>
-              <EditDialog name={name} description={description} dueDate={dueDate} duration={duration}
-                          isScheduled={isScheduled} isComplete={isComplete} id={id} gCalId={gCalId}
-                          getTasks={getTasks}/>
+              <EditDialog
+                name={name}
+                description={description}
+                dueDate={dueDate}
+                duration={duration}
+                isScheduled={isScheduled}
+                isComplete={isComplete}
+                id={id}
+                gCalId={gCalId}
+                getTasks={getTasks}
+              />
             }
             disablePadding
           >
@@ -61,10 +60,18 @@ export default function TaskList({taskList, checked, setChecked, getTasks}) {
                   checked={checked.includes(id)}
                   tabIndex={-1}
                   disableRipple
-                  inputProps={{"aria-labelledby": labelId}}
+                  inputProps={{ "aria-labelledby": labelId }}
                 />
               </ListItemIcon>
-              <ListItemText id={labelId} primary={name}/>
+              <ListItemText
+                id={labelId}
+                primary={name}
+                secondary={
+                  isScheduled
+                    ? "SHCELDUED TIME"
+                    : dueDate.toLocaleDateString() + " at " + dueDate.toLocaleTimeString("en-US")
+                }
+              />
             </ListItemButton>
           </ListItem>
         );
