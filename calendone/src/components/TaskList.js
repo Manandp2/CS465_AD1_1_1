@@ -70,7 +70,14 @@ export default function TaskList({ taskList, checked, setChecked, getTasks }) {
                 secondary={
                   isScheduled
                     ? "SHCELDUED TIME"
-                    : dueDate.toLocaleDateString() + " at " + dueDate.toLocaleTimeString("en-US")
+                    : "Due: " +
+                      dueDate.toLocaleDateString() +
+                      " at " +
+                      dueDate.toLocaleTimeString([], {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                        hour12: true,
+                      })
                 }
               />
             </ListItemButton>
