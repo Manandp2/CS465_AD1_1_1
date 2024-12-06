@@ -19,7 +19,21 @@ import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 import {auth, db} from "../utils/firebase";
 import {collection, doc, deleteDoc} from "firebase/firestore";
 
-export default function Bottombar({ status, setPage, getTasks, selectedList, setSelectedList }) {
+export default function Bottombar({ status, setPage, getTasks, 
+                                    unSchedChecked, setUnschedChecked,
+                                    schedChecked, setSchedChecked }) {
+  let selectedList;
+  switch(status) {
+    case "HomeUnscheduled":
+      selectedList = unSchedChecked;
+      break;
+    case "HomeScheduled":
+      selectedList = schedChecked;
+      break;
+    case "HomeMixed":
+      selectedList = unSchedChecked.concat(schedChecked);
+  }
+
   const deleteToDoFromFirestore = (task_id) => {
       const taskDocRef = doc(db, "users", auth.currentUser.uid, "tasks", task_id);
       deleteDoc(taskDocRef);
@@ -32,9 +46,21 @@ export default function Bottombar({ status, setPage, getTasks, selectedList, set
         // Delete each list item here
         deleteToDoFromFirestore(task_id)
       })
-      
-      // Empty out the list
-      setSelectedList([])
+
+      // Reset the checkedlists to bring back the unselected bottom bar
+      switch(status) {
+        case "HomeUnscheduled":
+          setUnschedChecked([]);
+          break;
+        case "HomeScheduled":
+          setSchedChecked([]);
+          break;
+        case "HomeMixed":
+          setUnschedChecked([]);
+          setSchedChecked([]);
+      }
+
+      // Refresh and getTasks again
       getTasks();
   }
 

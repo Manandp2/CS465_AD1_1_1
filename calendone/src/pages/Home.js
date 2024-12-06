@@ -151,8 +151,10 @@ export default function Home({ setUser, setPage }) {
         status={bottomBarStatus} 
         setPage={setPage} 
         getTasks={getTasks} 
-        selectedList={unschedChecked}
-        setSelectedList={setUnschedChecked} />
+        unSchedChecked={unschedChecked}
+        setUnschedChecked={setUnschedChecked}
+        schedChecked={schedChecked}
+        setSchedChecked={setSchedChecked} />
     </div>
   );
 }
