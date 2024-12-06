@@ -83,7 +83,7 @@ export default function EditDialog({
         {/* Title */}
         <DialogTitle>Edit {newTaskName}</DialogTitle>
         <DialogContent>
-          <Stack spacing={3} paddingTop={1}>
+          <Stack spacing={3} sx={{ paddingTop: 1 }}>
             {/* Task Name */}
             <TextField
               id="task-name"
