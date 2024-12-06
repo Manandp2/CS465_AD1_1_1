@@ -11,10 +11,10 @@ import AccordionSummary from "@mui/material/AccordionSummary";
 import AccordionDetails from "@mui/material/AccordionDetails";
 import Typography from "@mui/material/Typography";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
-import { Paper } from "@mui/material";
+import { Paper, Checkbox } from "@mui/material";
 
 import { auth, db } from "../utils/firebase";
-import {collection, doc, getDocs, writeBatch} from "firebase/firestore";
+import { collection, doc, getDocs, writeBatch } from "firebase/firestore";
 
 function CustomTabPanel(props) {
   const { children, value, index, ...other } = props;
@@ -38,17 +38,26 @@ CustomTabPanel.propTypes = {
   value: PropTypes.number.isRequired,
 };
 export default function Completed({ setPage }) {
-  const [isSelected, setIsSelected] = useState(false);
-  // const [activeTabIndex, setActiveTabIndex] = useState(0);
   const [completedChecked, setCompletedChecked] = React.useState([]);
-  const [showRecapModal, setShowRecapModal] = useState(false);
+  const [allCompletedChecked, setAllCompletedChecked] = useState(false);
+  const [completedTasks, setCompletedTasks] = useState([]);
 
-  const [completedList, setCompletedList] = useState([]);
+  useEffect(() => {
+    if (allCompletedChecked) {
+      setCompletedChecked([]);
+      completedTasks.forEach((task) => {
+        setCompletedChecked((prev) => [...prev, task.id]);
+      });
+    } else {
+      setCompletedChecked([]);
+    }
+  }, [allCompletedChecked]);
+
   const getTasks = () => {
     const tasksCollectionRef = collection(db, "users", auth.currentUser.uid, "tasks");
     getDocs(tasksCollectionRef)
       .then((querySnapshot) => {
-        setCompletedList([]);
+        setCompletedTasks([]);
         querySnapshot.forEach((doc) => {
           const task = doc.data();
           const fullTask = {
@@ -62,7 +71,7 @@ export default function Completed({ setPage }) {
             gCalId: task.gCalId,
           };
           if (task.isComplete) {
-            setCompletedList((prev) => [...prev, fullTask]);
+            setCompletedTasks((prev) => [...prev, fullTask]);
           }
         });
       })
@@ -72,7 +81,7 @@ export default function Completed({ setPage }) {
   };
 
   const unCompleteTasks = () => {
-    const batch = writeBatch(db);  // Create a new batch instance
+    const batch = writeBatch(db); // Create a new batch instance
     const tasksCollectionPath = `users/${auth.currentUser.uid}/tasks`;
 
     completedChecked.forEach((task) => {
@@ -80,15 +89,14 @@ export default function Completed({ setPage }) {
       batch.update(taskDocRef, { isComplete: false, isScheduled: false }); // Add the update operation to the batch
     });
 
-    batch.commit()
-    .then(() => {
+    batch.commit().then(() => {
       setCompletedChecked([]);
       getTasks();
-    })
-  }
+    });
+  };
 
   const deleteTasksFromFirestore = () => {
-    const batch = writeBatch(db);  // Create a new batch instance
+    const batch = writeBatch(db); // Create a new batch instance
     const tasksCollectionPath = `users/${auth.currentUser.uid}/tasks`;
 
     completedChecked.forEach((task) => {
@@ -96,12 +104,11 @@ export default function Completed({ setPage }) {
       batch.delete(taskDocRef); // Add the update operation to the batch
     });
 
-    batch.commit()
-    .then(() => {
+    batch.commit().then(() => {
       setCompletedChecked([]);
       getTasks();
-    })
-  }
+    });
+  };
 
   useEffect(() => {
     getTasks();
@@ -114,12 +121,23 @@ export default function Completed({ setPage }) {
       <Paper sx={{ overflowY: "scroll" }}>
         <Accordion disableGutters defaultExpanded>
           <AccordionSummary expandIcon={<ArrowDropDownIcon />} aria-controls="panel1-content" id="panel1-header">
-            <Typography>Completed Tasks</Typography>
+            <Checkbox
+              edge="start"
+              onClick={(e) => {
+                e.stopPropagation();
+                setAllCompletedChecked(!allCompletedChecked);
+              }}
+              checked={allCompletedChecked}
+              disabled={completedTasks.length === 0}
+            />
+            <Typography Typography sx={{ display: "flex", alignItems: "center" }}>
+              Completed Tasks
+            </Typography>
           </AccordionSummary>
           <AccordionDetails sx={{ paddingX: "0" }}>
             <Typography>
               <TaskList
-                taskList={completedList}
+                taskList={completedTasks}
                 checked={completedChecked}
                 setChecked={setCompletedChecked}
                 getTasks={getTasks}
@@ -133,7 +151,12 @@ export default function Completed({ setPage }) {
       {completedChecked.length === 0 ? (
         <Bottombar status={"Completed"} setPage={setPage} />
       ) : (
-        <Bottombar status={"Selected Completed"} setPage={setPage} unCompleteTasks={unCompleteTasks} deleteCompletedTasks={deleteTasksFromFirestore}/>
+        <Bottombar
+          status={"Selected Completed"}
+          setPage={setPage}
+          unCompleteTasks={unCompleteTasks}
+          deleteCompletedTasks={deleteTasksFromFirestore}
+        />
       )}
     </div>
   );

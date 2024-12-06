@@ -71,7 +71,7 @@ export default function Home({ setUser, setPage }) {
   };
 
   const completeTasksFromFirestore = () => {
-    const batch = writeBatch(db);  // Create a new batch instance
+    const batch = writeBatch(db); // Create a new batch instance
     const tasksCollectionPath = `users/${auth.currentUser.uid}/tasks`;
 
     schedChecked.forEach((task) => {
@@ -84,14 +84,12 @@ export default function Home({ setUser, setPage }) {
       batch.update(taskDocRef, { isComplete: true }); // Add the update operation to the batch
     });
 
-    batch.commit()
-    .then(() => {
+    batch.commit().then(() => {
       setSchedChecked([]);
       setUnschedChecked([]);
       getTasks();
-    })
-  }
-
+    });
+  };
 
   const getTasks = () => {
     const tasksCollectionRef = collection(db, "users", auth.currentUser.uid, "tasks");
