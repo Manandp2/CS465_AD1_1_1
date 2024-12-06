@@ -38,7 +38,6 @@ CustomTabPanel.propTypes = {
   value: PropTypes.number.isRequired,
 };
 export default function Home({setUser, setPage}) {
-export default function Home({ setUser, setPage }) {
   const SignOut = () => {
     signOut(auth)
     .then(() => {
@@ -159,7 +158,8 @@ export default function Home({ setUser, setPage }) {
       ) : (
         <Bottombar status={"Selected Home"} setPage={setPage} />
       )} */}
-      <Bottombar status={bottomBarStatus} setPage={setPage} getTasks={getTasks} />
+      <Bottombar status={bottomBarStatus} setPage={setPage} getTasks={getTasks}/>
     </div>
   );
 }
+
