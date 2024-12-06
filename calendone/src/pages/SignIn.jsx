@@ -1,4 +1,4 @@
-import { auth, db } from "../utils/firebase";
+/* import { auth, db } from "../utils/firebase";
 import { signInWithPopup, GoogleAuthProvider } from "firebase/auth";
 import { doc, setDoc } from "firebase/firestore";
 import { gapi } from "gapi-script";
@@ -71,4 +71,91 @@ function SignIn(props) {
   );
 }
 
+export default SignIn; */
+
+import React from "react";
+import { Button, Paper, Typography, Box } from "@mui/material";
+import { auth, db } from "../utils/firebase";
+import { signInWithPopup, GoogleAuthProvider } from "firebase/auth";
+import { doc, setDoc } from "firebase/firestore";
+
+function SignIn(props) {
+  const signInWithGoogle = () => {
+    const provider = new GoogleAuthProvider();
+    provider.addScope("https://www.googleapis.com/auth/calendar");
+    signInWithPopup(auth, provider)
+      .then((result) => {
+        const cred = GoogleAuthProvider.credentialFromResult(result);
+        props.setUser(result.user);
+        setDoc(
+          doc(db, "users", result.user.uid),
+          {
+            accessToken: cred.accessToken,
+          },
+          { merge: true }
+        ).then(() => {
+          console.log("accessToken saved");
+        });
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  };
+
+  return (
+    <Box
+      sx={{
+        height: "100vh",
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "center",
+        alignItems: "center",
+        background: "linear-gradient(135deg, #6d3b79, #a64ca6)",
+      }}
+    >
+      <Paper
+        elevation={3}
+        sx={{
+          padding: "2rem",
+          textAlign: "center",
+          borderRadius: "16px",
+          background: "white",
+          boxShadow: "0px 4px 10px rgba(0,0,0,0.1)",
+        }}
+      >
+        <Typography
+          variant="h4"
+          sx={{ marginBottom: "1rem", color: "#6d3b79", fontWeight: "bold" }}
+        >
+          Welcome to CalenDone
+        </Typography>
+        <Typography
+          variant="body1"
+          sx={{ marginBottom: "1.5rem", color: "#333" }}
+        >
+          Connect your account to get started!
+        </Typography>
+        <Button
+          variant="contained"
+          onClick={signInWithGoogle}
+          sx={{
+            backgroundColor: "#6d3b79",
+            color: "white",
+            textTransform: "none",
+            fontWeight: "bold",
+            borderRadius: "8px",
+            padding: "0.75rem 1.5rem",
+            "&:hover": {
+              backgroundColor: "#a64ca6",
+            },
+          }}
+        >
+          Sign in with Google
+        </Button>
+      </Paper>
+    </Box>
+  );
+}
+
 export default SignIn;
+
