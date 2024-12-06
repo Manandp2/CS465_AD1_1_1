@@ -65,6 +65,29 @@ export default function Home({ setUser, setPage }) {
     })
   }
 
+  const completeTasksFromFirestore = () => {
+    const batch = writeBatch(db);  // Create a new batch instance
+    const tasksCollectionPath = `users/${auth.currentUser.uid}/tasks`;
+
+    schedChecked.forEach((task) => {
+      const taskDocRef = doc(db, tasksCollectionPath, task); // Create a reference to the document
+      batch.update(taskDocRef, { isComplete: true }); // Add the update operation to the batch
+    });
+
+    unschedChecked.forEach((task) => {
+      const taskDocRef = doc(db, tasksCollectionPath, task); // Create a reference to the document
+      batch.update(taskDocRef, { isComplete: true }); // Add the update operation to the batch
+    });
+
+    batch.commit()
+    .then(() => {
+      setSchedChecked([]);
+      setUnschedChecked([]);
+      getTasks();
+    })
+  }
+
+
   const getTasks = () => {
     const tasksCollectionRef = collection(db, "users", auth.currentUser.uid, "tasks");
     getDocs(tasksCollectionRef)
@@ -186,7 +209,9 @@ export default function Home({ setUser, setPage }) {
         unSchedChecked={unschedChecked}
         setUnschedChecked={setUnschedChecked}
         schedChecked={schedChecked}
-        setSchedChecked={setSchedChecked} />
+        setSchedChecked={setSchedChecked}
+        completeTasks={completeTasksFromFirestore}
+      />
     </div>
   );
 }
