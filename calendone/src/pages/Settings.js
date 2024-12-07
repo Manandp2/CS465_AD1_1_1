@@ -11,6 +11,7 @@ import AccordionDetails from "@mui/material/AccordionDetails";
 import Typography from "@mui/material/Typography";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 import Paper from "@mui/material/Paper";
+import TextField from "@mui/material/TextField";
 
 import dayjs from "dayjs";
 import { TimePicker } from "@mui/x-date-pickers/TimePicker";
@@ -82,6 +83,74 @@ function WorkTimesAccordion() {
                             onChange={(value) => setEndTime(value)}
                             minTime={startTime}
                         />
+                    </FormControl>
+                    <FormControl sx={{ m: 1, minWidth: 120 }}>
+                        <Button 
+                            variant="contained"
+                            sx={{textTransform: "None", backgroundColor: "#6d3b79"}}
+                            onClick={saveChanges}
+                        >
+                            <Typography>Save Changes</Typography>
+                        </Button>
+                    </FormControl>
+                </Box>
+            </AccordionDetails>
+        </Accordion>
+    )
+}
+
+function BufferTimeAccordion() {
+    const [bufferTime, setBufferTime] = React.useState(0);
+    useEffect(() => {
+        getDoc(
+            doc(db, "users", auth.currentUser.uid)
+          ).then((res) => {
+            const data = res.data();
+            setBufferTime(data.bufferTime)
+          }
+        )
+    }, [])
+
+    const saveChanges = () => {
+        // Save worktime to firebase
+        const taskDocRef = doc(db, "users", auth.currentUser.uid);
+
+        setDoc(taskDocRef, {
+            bufferTime: bufferTime
+        }, {merge:true})
+        .then(() => {
+            console.log("Buffer time updated in Firestore");
+        })
+        .catch((error) => {
+            console.error("Error updating buffer time: ", error);
+        });
+    }
+
+    return (
+        <Accordion disableGutters defaultExpanded>
+            <AccordionSummary expandIcon={<ArrowDropDownIcon />} aria-controls="panel1-1-content" id="panel1-1-header">
+                <Typography sx={{ width: '33%', flexShrink: 0 }}>
+                    Buffer Time
+                </Typography>
+                <Typography sx={{ color: 'text.secondary' }}>
+                    {bufferTime + " minutes"}
+                </Typography>
+            </AccordionSummary>
+            <AccordionDetails sx={{textAlign: "center"}}>
+                <Box component="form" sx={{ display: 'flex', flexWrap: 'wrap' }}>
+                    <FormControl sx={{ m: 1, minWidth: 120 }}>
+                    <TextField
+                        id="outlined-number"
+                        label="Buffer Time"
+                        type="number"
+                        value={bufferTime}
+                        onChange={(event) => setBufferTime(Number(event.target.value))}
+                        slotProps={{
+                            inputLabel: {
+                            shrink: true,
+                            },
+                        }}
+                    />
                     </FormControl>
                     <FormControl sx={{ m: 1, minWidth: 120 }}>
                         <Button 
@@ -176,6 +245,7 @@ export default function Settings({ setUser, setPage }) {
             </AccordionSummary>
             <AccordionDetails>
                 <WorkTimesAccordion />
+                <BufferTimeAccordion />
             </AccordionDetails>
             </Accordion>
 

@@ -42,6 +42,11 @@ function SignIn(props) {
         }
 
         const data = userDoc.data();
+        if (!data.bufferTime) {
+          transaction.update(userDocRef, {
+            bufferTime: 5,
+          });
+        }
         if (!data.startTime) {
           transaction.update(userDocRef, {
             startTime: dayjs('2024-12-06T10:00').toDate(),
