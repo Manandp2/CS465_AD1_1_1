@@ -57,6 +57,22 @@ const getGoogleCalendarEvents = async (accessToken) => {
 };
 
 // Helper function to send a slotted Todo to Google Calendar
+async function removeFromGoogleCalendar(calendarId, eventId) {
+  try {
+    const request = gapi.client.calendar.events.delete({
+      calendarId: calendarId, // Use the user's primary calendar
+      eventId: eventId
+    });
+
+    await request.execute((event) => {
+      console.log(`Event deleted with Google Calendar ID: `, eventId);
+    });
+  } catch (error) {
+    console.error("Error deleting todo in Google Calendar:", error);
+  }
+}
+
+// Helper function to send a slotted Todo to Google Calendar
 async function sendToGoogleCalendar(calendarId, todo) {
   try {
     const event = {
@@ -164,6 +180,8 @@ export default async function scheduleTodos(unscheduledTodos, accessToken) {
 
       await Promise.all(sendToCalendarPromises);
     }
+
+    await Promise.all(sendToCalendarPromises);
     return {slottedTodos, unslottedTodos};
 
   } catch (error) {
