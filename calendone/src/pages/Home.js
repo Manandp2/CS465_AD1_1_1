@@ -31,7 +31,52 @@ export default function Home({ setPage }) {
 
   const [accessToken, setAccessToken] = useState("");
   const [eventsFromCalendar, setEventsFromCalendar] = useState([]);
+  const [calendarId, setCalendarId] = useState("");
+  const [recapEvents, setRecapEvents] = useState([]);
 
+  const checkEventsForRecap = async (calendarId, scheduledTasks) => {
+    const eventEnds = []; // Array to collect eventEnd dates
+
+    // Map scheduledTasks to an array of promises and resolve them
+    console.log("scheduledTasks.length", scheduledTasks.length);
+    const promises = scheduledTasks.map((task) => {
+      return new Promise((resolve, reject) => {
+        const request = gapi.client.calendar.events.get({
+          calendarId: calendarId,
+          eventId: task.gCalId,
+        });
+
+        request.execute((event) => {
+          if (event.error) {
+            console.log(event.error);
+            reject(event.error);
+          } else {
+            console.log(`Event retrieved with Google Calendar ID: ${event.id}`);
+            const eventEnd = new Date(event.end.dateTime);
+            resolve({endTime: eventEnd, id: task.id});
+          }
+        });
+      });
+    });
+
+    try {
+      const results = await Promise.all(promises);
+      eventEnds.push(...results);
+      console.log("Event ends:", eventEnds);
+    } catch (error) {
+      console.error("Error fetching events:", error);
+    }
+
+
+    const now = new Date();
+    setRecapEvents([]);
+    eventEnds.forEach(eventEnd => {
+      if (eventEnd.endTime < now) {
+        setRecapEvents((prevRecapEvents) => [...prevRecapEvents, eventEnd.id]);
+      }
+    });
+    // return eventEnds; // Return the array of event ends if needed
+  };
   const scheduleTasksFromFirestore = () => {
     const batch = writeBatch(db); // Create a new batch instance
     const tasksCollectionPath = `users/${auth.currentUser.uid}/tasks`;
@@ -85,48 +130,65 @@ export default function Home({ setPage }) {
     });
   };
 
-  const getTasks = () => {
+  const getTasks = async () => {
     const tasksCollectionRef = collection(db, "users", auth.currentUser.uid, "tasks");
-    getDocs(tasksCollectionRef)
-      .then((querySnapshot) => {
-        setUnscheduledTasks([]);
-        setScheduledTasks([]);
-        querySnapshot.forEach((doc) => {
-          const task = doc.data();
-          const fullTask = {
-            name: task.name,
-            description: task.description,
-            dueDate: task.dueDate.toDate(),
-            duration: task.duration,
-            isScheduled: task.isScheduled,
-            isComplete: task.isComplete,
-            id: doc.id,
-            gCalId: task.gCalId,
-          };
-          if (task.isScheduled && !task.isComplete) {
-            setScheduledTasks((prev) => [...prev, fullTask]);
-          } else if (!task.isScheduled && !task.isComplete) {
-            setUnscheduledTasks((prev) => [...prev, fullTask]);
-          }
-        });
-      })
-      .catch((error) => {
-        console.log(error);
+
+    try {
+      const querySnapshot = await getDocs(tasksCollectionRef);
+
+      // Reset the tasks arrays
+      setUnscheduledTasks([]);
+      setScheduledTasks([]);
+      let localTasks = [];
+      querySnapshot.forEach((doc) => {
+        const task = doc.data();
+        const fullTask = {
+          name: task.name,
+          description: task.description,
+          dueDate: task.dueDate.toDate(),
+          duration: task.duration,
+          isScheduled: task.isScheduled,
+          isComplete: task.isComplete,
+          id: doc.id,
+          gCalId: task.gCalId,
+        };
+
+        if (task.isScheduled && !task.isComplete) {
+          localTasks.push(fullTask);
+          setScheduledTasks((prev) => [...prev, fullTask]);
+        } else if (!task.isScheduled && !task.isComplete) {
+          setUnscheduledTasks((prev) => [...prev, fullTask]);
+        }
       });
+      return localTasks;
+    } catch (error) {
+      console.log(error);
+    }
   };
 
-  const getAccessToken = () => {
+  const getAccessToken = async () => {
     const docRef = doc(db, "users", auth.currentUser.uid);
-    getDoc(docRef).then((doc) => {
-      const data = doc.data();
+
+    try {
+      const docSnap = await getDoc(docRef);
+      const data = docSnap.data();
+
       setAccessToken(data.accessToken);
-      // getGoogleCalendarEvents();
-    });
+      setCalendarId(data.calendarId);
+      return data.calendarId;
+      // If needed in future, you can call getGoogleCalendarEvents();
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   useEffect(() => {
-    getTasks();
-    getAccessToken();
+    const fetchData = async () => {
+      const l = await getTasks();
+      const c = await getAccessToken();
+      await checkEventsForRecap(c, l);
+    }
+    fetchData();
   }, []);
 
   useEffect(() => {
