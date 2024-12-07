@@ -27,7 +27,7 @@ export default function Home({ setPage }) {
   const [unschedChecked, setUnschedChecked] = React.useState([]);
   const [schedChecked, setSchedChecked] = React.useState([]);
 
-  const [newCompletedExist, setNewCompletedExist] = React.useState(true);
+  const [newCompletedExist, setNewCompletedExist] = React.useState(false);
 
   const [accessToken, setAccessToken] = useState("");
   const [eventsFromCalendar, setEventsFromCalendar] = useState([]);

@@ -12,12 +12,12 @@ import Laodi from "./pages/Laodi";
 
 function App() {
   const [currentUser, setCurrentUser] = useState(null);
-  const [curPage, setCurPage] = useState("Loading");
+  const [hasSignedIn, setHasSignedIn] = useState(false);
+  const [curPage, setCurPage] = useState("SignIn");
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       setCurrentUser(user);
-      setCurPage("Home");
     });
 
     // Cleanup subscription on unmount
@@ -26,7 +26,7 @@ function App() {
   if (curPage === "Loading") {
     return <Laodi />;
   }
-  if (currentUser !== null) {
+  if (currentUser !== null && hasSignedIn === true) {
     return (
       <LocalizationProvider dateAdapter={AdapterDayjs}>
         {curPage === "Home" && <Home setUser={setCurrentUser} setPage={setCurPage} />}
@@ -36,7 +36,7 @@ function App() {
     );
   }
 
-  return <SignIn setUser={setCurrentUser} />;
+  return <SignIn setHasSignedIn={setHasSignedIn} setPage={setCurPage} />;
 }
 
 export default App;

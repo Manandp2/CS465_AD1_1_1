@@ -2,7 +2,7 @@ import React from "react";
 import { Button, Paper, Typography, Box } from "@mui/material";
 import { auth, db } from "../utils/firebase";
 import { signInWithPopup, GoogleAuthProvider } from "firebase/auth";
-import { doc, setDoc, getDoc } from "firebase/firestore";
+import { doc, setDoc, runTransaction } from "firebase/firestore";
 
 import dayjs from 'dayjs';
 
@@ -29,43 +29,55 @@ function generateSparkles(numSparkles) {
 function SignIn(props) {
   const sparkles = generateSparkles(50);
 
+  const updateStartTimeIfNotExists = async (userId) => {
+    const userDocRef = doc(db, "users", userId);
+
+    try {
+      await runTransaction(db, async (transaction) => {
+        const userDoc = await transaction.get(userDocRef);
+
+        if (!userDoc.exists()) {
+          throw "Document does not exist!";
+        }
+
+        const data = userDoc.data();
+        if (!data.startTime) {
+          transaction.update(userDocRef, {
+            startTime: dayjs('2024-12-06T8:00').toDate(),
+            endTime: dayjs('2024-12-06T18:00').toDate(),
+          });
+          console.log("watchTime saved");
+          props.setPage("Home");
+        } else {
+          props.setPage("Home");
+        }
+      });
+    } catch (error) {
+      console.error("Transaction failed: ", error);
+    }
+  };
   const signInWithGoogle = () => {
     const provider = new GoogleAuthProvider();
     provider.addScope("https://www.googleapis.com/auth/calendar");
     signInWithPopup(auth, provider)
-      .then((result) => {
-        const cred = GoogleAuthProvider.credentialFromResult(result);
-        props.setUser(result.user);
-        setDoc(
-          doc(db, "users", result.user.uid),
-          {
-            accessToken: cred.accessToken,
-          },
-          { merge: true }
-        ).then(() => {
-          console.log("accessToken saved");
-        });
-        getDoc(
-          doc(db, "users", result.user.uid)
-        ).then((res) => {
-          const data = res.data();
-          if (!data.startTime) {
-            setDoc(
-              doc(db, "users", result.user.uid),
-              {
-                startTime: dayjs('2024-12-06T8:00').toDate(),
-                endTime: dayjs('2024-12-06T18:00').toDate(),
-              },
-              { merge: true }
-            ).then(() => {
-              console.log("watchTime saved");
-            });
-          }
-        })
+    .then((result) => {
+      const cred = GoogleAuthProvider.credentialFromResult(result);
+      props.setHasSignedIn(true);
+
+      setDoc(
+        doc(db, "users", result.user.uid),
+        {
+          accessToken: cred.accessToken,
+        },
+        { merge: true }
+      ).then(() => {
+        console.log("accessToken saved", cred.accessToken);
+        return updateStartTimeIfNotExists(result.user.uid); // Call the new function
       })
-      .catch((error) => {
-        console.log(error);
-      });
+    })
+    .catch((error) => {
+      console.error(error);
+    });
   };
 
   return (
