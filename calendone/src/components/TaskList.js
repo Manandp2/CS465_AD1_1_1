@@ -137,7 +137,22 @@ export default function TaskList({ taskList, checked, setChecked, getTasks }) {
                 primary={name}
                 secondary={
                   isScheduled
-                    ? "SHCELDUED TIME"
+                    ? "Scheduled: " +
+                    startTime.toLocaleDateString(undefined, {
+                      month: "numeric",
+                      day: "numeric"
+                    })
+                    + " at " +
+                    startTime.toLocaleTimeString([], {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                      hour12: true,
+                    }) + " - " +
+                    endTime.toLocaleTimeString([], {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                      hour12: true,
+                    })
                     : "Due: " +
                       dueDate.toLocaleDateString() +
                       " at " +
