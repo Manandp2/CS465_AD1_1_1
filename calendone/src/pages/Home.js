@@ -14,7 +14,7 @@ import { auth, db } from "../utils/firebase";
 import { collection, doc, getDoc, getDocs, writeBatch } from "firebase/firestore";
 import RecapDialog from "../components/RecapDialog";
 import { gapi } from "gapi-script";
-import scheduleTodos from '../utils/calendoneAmogus';
+import scheduleTodos from "../utils/calendoneAmogus";
 
 export default function Home({ setPage }) {
   const [unscheduledTasks, setUnscheduledTasks] = useState([]);
@@ -236,7 +236,7 @@ export default function Home({ setPage }) {
       <Paper variant="outlined" square elevation={0} sx={{ overflowY: "scroll" }}>
          <Button onClick={() => {
            scheduleTodos(unschedChecked, accessToken).then(() => getTasks())
-         }}> Get events</Button>
+         }}> REAL SCHEDULE BUTTON </Button>
         <Accordion disableGutters defaultExpanded>
           <AccordionSummary expandIcon={<ArrowDropDownIcon />} aria-controls="panel1-content" id="panel1-header">
             <Checkbox
