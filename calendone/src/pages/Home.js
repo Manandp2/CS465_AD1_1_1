@@ -234,7 +234,9 @@ export default function Home({ setPage }) {
         <Typography variant="h4">PLACEHOLDER</Typography>
       </Paper>
       <Paper variant="outlined" square elevation={0} sx={{ overflowY: "scroll" }}>
-         <Button onClick={() => scheduleTodos(unschedChecked, accessToken)}> Get events</Button>
+         <Button onClick={() => {
+           scheduleTodos(unschedChecked, accessToken).then(() => getTasks())
+         }}> Get events</Button>
         <Accordion disableGutters defaultExpanded>
           <AccordionSummary expandIcon={<ArrowDropDownIcon />} aria-controls="panel1-content" id="panel1-header">
             <Checkbox

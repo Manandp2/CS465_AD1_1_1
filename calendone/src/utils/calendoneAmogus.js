@@ -1,4 +1,4 @@
-import {doc, getDoc} from "firebase/firestore";
+import {doc, getDoc, updateDoc} from "firebase/firestore";
 import {auth, db} from "./firebase";
 import {gapi} from 'gapi-script';
 
@@ -55,7 +55,6 @@ const getGoogleCalendarEvents = async (accessToken) => {
     console.error("Error fetching calendars:", error);
     throw error;
   }
-
   return eventsFromCalendar;
 };
 
@@ -105,7 +104,7 @@ export default async function scheduleTodos(unscheduledTodos, accessToken) {
       const path = `users/${auth.currentUser.uid}/tasks`;
       const docRef = doc(db, path, id);
       const result = await getDoc(docRef);
-      todos.push(result.data());
+      todos.push({...result.data(), id: id});
     });
 
     await Promise.all(fetchTodosPromises);
@@ -157,11 +156,27 @@ export default async function scheduleTodos(unscheduledTodos, accessToken) {
 
       const sendToCalendarPromises = slottedTodos.map(async (todo) => {
         await sendToGoogleCalendar(calendarId, todo);
+        const path = `users/${auth.currentUser.uid}/tasks`;
+        const docRef = doc(db, path, todo.id);
+        await updateDoc(docRef, {isScheduled: true});
       });
 
-      await Promise.all(sendToCalendarPromises);
-    }
+      const setAsScheduled = slottedTodos.map(async (todo) => {
 
+        console.log("set as scheduled");
+      })
+
+
+      await Promise.all(sendToCalendarPromises);
+      try {
+        // await Promise.all(setAsScheduled);
+
+      } catch (error) {
+        console.log("seting aa sschedlueld error", error);
+      }
+
+    }
+    console.log("return now")
     return {slottedTodos, unslottedTodos};
 
   } catch (error) {
