@@ -27,14 +27,14 @@ export default function Home({ setPage }) {
   const [unschedChecked, setUnschedChecked] = React.useState([]);
   const [schedChecked, setSchedChecked] = React.useState([]);
 
-  const [newCompletedExist, setNewCompletedExist] = React.useState(true);
-
   const [accessToken, setAccessToken] = useState("");
   const [eventsFromCalendar, setEventsFromCalendar] = useState([]);
   const [calendarId, setCalendarId] = useState("");
 
   const [recapChecked, setRecapChecked] = React.useState([]);
   const [recapEvents, setRecapEvents] = useState([]);
+
+  const [newCompletedExist, setNewCompletedExist] = React.useState(false);
 
   const checkEventsForRecap = async (calendarId, scheduledTasks) => {
     const eventEnds = []; // Array to collect eventEnd dates
@@ -55,7 +55,7 @@ export default function Home({ setPage }) {
           } else {
             console.log(`Event retrieved with Google Calendar ID: ${event.id}`);
             const eventEnd = new Date(event.end.dateTime);
-            resolve({ endTime: eventEnd, id: task.id });
+            resolve({ endTime: eventEnd, task: task });
           }
         });
       });
@@ -73,7 +73,8 @@ export default function Home({ setPage }) {
     setRecapEvents([]);
     eventEnds.forEach((eventEnd) => {
       if (eventEnd.endTime < now) {
-        setRecapEvents((prevRecapEvents) => [...prevRecapEvents, eventEnd.id]);
+        setRecapEvents((prevRecapEvents) => [...prevRecapEvents, eventEnd.task]);
+        setNewCompletedExist(true);
       }
     });
     // return eventEnds; // Return the array of event ends if needed

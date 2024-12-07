@@ -95,18 +95,18 @@ export default function RecapDialog({ open, setOpen, taskList, checked, setCheck
                     <ListItemText
                       id={labelId}
                       primary={name}
-                      // secondary={
-                      //   isScheduled
-                      //     ? "SHCELDUED TIME"
-                      //     : "Due: " +
-                      //       dueDate.toLocaleDateString() +
-                      //       " at " +
-                      //       dueDate.toLocaleTimeString([], {
-                      //         hour: "2-digit",
-                      //         minute: "2-digit",
-                      //         hour12: true,
-                      //       })
-                      // }
+                      secondary={
+                        isScheduled
+                          ? "SHCELDUED TIME"
+                          : "Due: " +
+                            dueDate.toLocaleDateString() +
+                            " at " +
+                            dueDate.toLocaleTimeString([], {
+                              hour: "2-digit",
+                              minute: "2-digit",
+                              hour12: true,
+                            })
+                      }
                     />
                   </ListItemButton>
                 </ListItem>
