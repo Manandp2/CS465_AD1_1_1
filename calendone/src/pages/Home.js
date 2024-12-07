@@ -53,7 +53,7 @@ export default function Home({ setPage }) {
           } else {
             console.log(`Event retrieved with Google Calendar ID: ${event.id}`);
             const eventEnd = new Date(event.end.dateTime);
-            resolve({endTime: eventEnd, id: task.id});
+            resolve({endTime: eventEnd, task: task});
           }
         });
       });
@@ -72,7 +72,7 @@ export default function Home({ setPage }) {
     setRecapEvents([]);
     eventEnds.forEach(eventEnd => {
       if (eventEnd.endTime < now) {
-        setRecapEvents((prevRecapEvents) => [...prevRecapEvents, eventEnd.id]);
+        setRecapEvents((prevRecapEvents) => [...prevRecapEvents, eventEnd.task]);
       }
     });
     // return eventEnds; // Return the array of event ends if needed
