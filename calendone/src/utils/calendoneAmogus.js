@@ -84,7 +84,8 @@ async function sendToGoogleCalendar(calendarId, todo) {
       end: {
         dateTime: todo.endTime,
         // timeZone: 'America/Chicago' // Change as needed
-      }
+      },
+      description: todo.description 
     };
 
     const request = gapi.client.calendar.events.insert({
