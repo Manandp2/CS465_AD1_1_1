@@ -1,12 +1,9 @@
-import {doc, getDoc} from "firebase/firestore";
-import {auth, db} from "./firebase";
-import {gapi} from 'gapi-script';
-
+import { doc, getDoc } from "firebase/firestore";
+import { auth, db } from "./firebase";
+import { gapi } from "gapi-script";
 
 const getGoogleCalendarEvents = async (accessToken) => {
-  await new Promise((resolve) =>
-    gapi.load("client:auth2", resolve)
-  );
+  await new Promise((resolve) => gapi.load("client:auth2", resolve));
 
   await gapi.client.init({
     apiKey: "AIzaSyDZYd2i-rX4oN_7i2AeSwGeJ0Uq2jo_Rng",
@@ -21,6 +18,7 @@ const getGoogleCalendarEvents = async (accessToken) => {
 
   try {
     const response = await gapi.client.calendar.calendarList.list();
+    console.log("CALENDAR LIST: ", response);
     const calendars = response.result.items;
 
     if (calendars.length > 0) {
@@ -59,7 +57,6 @@ const getGoogleCalendarEvents = async (accessToken) => {
   return eventsFromCalendar;
 };
 
-
 // Helper function to send a slotted Todo to Google Calendar
 async function sendToGoogleCalendar(todo) {
   try {
@@ -72,12 +69,12 @@ async function sendToGoogleCalendar(todo) {
       end: {
         dateTime: todo.endTime,
         // timeZone: 'America/Chicago' // Change as needed
-      }
+      },
     };
 
     const request = gapi.client.calendar.events.insert({
-      calendarId: 'primary', // Use the user's primary calendar
-      resource: event
+      calendarId: "primary", // Use the user's primary calendar
+      resource: event,
     });
 
     await request.execute((event) => {
@@ -88,10 +85,15 @@ async function sendToGoogleCalendar(todo) {
   }
 }
 
-
-
 export default async function scheduleTodos(unscheduledTodos, accessToken) {
   if (unscheduledTodos.length === 0) {
+    const events = await getGoogleCalendarEvents(accessToken);
+    const weekDates = generateWeekDates();
+    for (const date of weekDates) {
+      const occupiedMinutes = new Array(1440).fill(false);
+      const eventsForDay = filterEventsByDate(events, date);
+      console.log("events for day: ", eventsForDay);
+    }
     return;
   }
 
@@ -125,7 +127,7 @@ export default async function scheduleTodos(unscheduledTodos, accessToken) {
       await markOccupiedTimeSlots(occupiedMinutes, eventsForDay);
 
       const availableSlots = createAvailableTimeSlots(occupiedMinutes);
-      const {slotted, unslotted} = scheduleForDay(unslottedTodos, availableSlots, date);
+      const { slotted, unslotted } = scheduleForDay(unslottedTodos, availableSlots, date);
 
       slottedTodos.push(...slotted);
       unslottedTodos = unslotted;
@@ -142,8 +144,7 @@ export default async function scheduleTodos(unscheduledTodos, accessToken) {
       await Promise.all(sendToCalendarPromises);
     }
 
-    return {slottedTodos, unslottedTodos};
-
+    return { slottedTodos, unslottedTodos };
   } catch (error) {
     console.error("Error in scheduling todos:", error);
   }
@@ -169,13 +170,13 @@ function scheduleForDay(todos, availableSlots, date) {
     }
   }
 
-  return {slotted, unslotted};
+  return { slotted, unslotted };
 }
 
 // Get today's date and the next six days
 function generateWeekDates() {
   const today = new Date();
-  return Array.from({length: 7}, (_, i) => {
+  return Array.from({ length: 7 }, (_, i) => {
     const date = new Date(today);
     date.setDate(today.getDate() + i);
     return date;
@@ -184,7 +185,7 @@ function generateWeekDates() {
 
 // separates all the GC events into their respective date
 function filterEventsByDate(events, date) {
-  return events.filter(event => {
+  return events.filter((event) => {
     const eventDate = event.start;
     return eventDate.toDateString() === date.toDateString();
   });
@@ -200,10 +201,9 @@ function sortByDeadlineAndDuration(todos) {
   });
 }
 
-
 // Mark array indices as occupied by existing events
 async function markOccupiedTimeSlots(occupiedMinutes, googleCalendarEvents) {
-  googleCalendarEvents.forEach(event => {
+  googleCalendarEvents.forEach((event) => {
     const startMinute = getMinuteOfDay(event.start);
     const endMinute = getMinuteOfDay(event.end);
     console.log("Block out interval from: ", startMinute, " to ", endMinute);
@@ -247,13 +247,13 @@ function createAvailableTimeSlots(occupiedMinutes) {
     if (!occupiedMinutes[i] && startTime === null) {
       startTime = i;
     } else if (occupiedMinutes[i] && startTime !== null) {
-      availableSlots.push({startTime, endTime: i});
+      availableSlots.push({ startTime, endTime: i });
       startTime = null;
     }
   }
 
   if (startTime !== null) {
-    availableSlots.push({startTime, endTime: occupiedMinutes.length});
+    availableSlots.push({ startTime, endTime: occupiedMinutes.length });
   }
   console.log("Available Timeslots: ", availableSlots);
   return availableSlots;
@@ -270,12 +270,23 @@ function createScheduledTodo(todo, slot, date) {
   startTime.setHours(0, slot.startTime, 0, 0);
   console.log("Set hours of ", slot.startTime, " / 60 = ", startTime);
   const endTime = new Date(startTime.getTime() + todo.duration * 60000);
-  console.log("Setting Todo ", todo.title, " of timeslot [", slot.startTime, ", ", slot.endTime, "] to ", startTime, " -> ", endTime)
+  console.log(
+    "Setting Todo ",
+    todo.title,
+    " of timeslot [",
+    slot.startTime,
+    ", ",
+    slot.endTime,
+    "] to ",
+    startTime,
+    " -> ",
+    endTime
+  );
   return {
     ...todo,
     startTime,
     endTime,
-    status: 'SCHEDULED'
+    status: "SCHEDULED",
   };
 }
 
@@ -292,7 +303,6 @@ function updateAvailableSlot(availableSlots, slot, duration) {
 function getMinuteOfDay(date) {
   return date.getHours() * 60 + date.getMinutes();
 }
-
 
 // const result = scheduleTodos(unscheduledTodos, googleCalendarEvents);
 // console.log(result);
