@@ -118,14 +118,33 @@ export default async function scheduleTodos(unscheduledTodos, accessToken) {
     const slottedTodos = [];
     let unslottedTodos = [...sortedTodos];
 
+    let calendarId = "primary"; // Default to primary if not found
+    let bufferTime = 5; // Default to 5 if not found
+    const userDocRef = doc(db, "users", auth.currentUser.uid);
+
+    try {
+      const userDocSnap = await getDoc(userDocRef);
+      if (userDocSnap.exists()) {
+        const userData = userDocSnap.data();
+        if (userData.calendarId) {
+          calendarId = userData.calendarId;
+        }
+        if (userData.bufferTime) {
+          bufferTime = userData.bufferTime;
+        }
+      }
+    } catch (error) {
+      console.error("Error getting calendarId from Firestore:", error);
+    }
+
     for (const date of weekDates) {
       const occupiedMinutes = new Array(1440).fill(false);
       const eventsForDay = filterEventsByDate(events, date);
       console.log("events for day: ", eventsForDay);
-      await markOccupiedTimeSlots(occupiedMinutes, eventsForDay, date);
+      await markOccupiedTimeSlots(occupiedMinutes, eventsForDay, date, bufferTime);
 
       const availableSlots = createAvailableTimeSlots(occupiedMinutes);
-      const {slotted, unslotted} = scheduleForDay(unslottedTodos, availableSlots, date);
+      const {slotted, unslotted} = scheduleForDay(unslottedTodos, availableSlots, date, bufferTime);
 
       slottedTodos.push(...slotted);
       unslottedTodos = unslotted;
@@ -135,21 +154,6 @@ export default async function scheduleTodos(unscheduledTodos, accessToken) {
     console.log("unslkdjsiojdo", unslottedTodos);
     // Send slotted todos to Google Calendar after generating time slots
     if (slottedTodos.length > 0) {
-
-      const userDocRef = doc(db, "users", auth.currentUser.uid);
-      let calendarId = "primary"; // Default to primary if not found
-
-      try {
-        const userDocSnap = await getDoc(userDocRef);
-        if (userDocSnap.exists()) {
-          const userData = userDocSnap.data();
-          if (userData.calendarId) {
-            calendarId = userData.calendarId;
-          }
-        }
-      } catch (error) {
-        console.error("Error getting calendarId from Firestore:", error);
-      }
 
       const sendToCalendarPromises = slottedTodos.map(async (todo) => {
         await sendToGoogleCalendar(calendarId, todo);
@@ -166,16 +170,16 @@ export default async function scheduleTodos(unscheduledTodos, accessToken) {
 }
 
 // Fit Todo in earliest timeslot possible, push to slotted if it can, unslotted if not
-function scheduleForDay(todos, availableSlots, date) {
+function scheduleForDay(todos, availableSlots, date, bufferTime) {
   const slotted = [];
   const unslotted = [];
 
   for (const todo of todos) {
     let isSlotted = false;
     for (const slot of availableSlots) {
-      if (canFitTodo(todo, slot)) {
+      if (canFitTodo(todo, slot, bufferTime)) {
         slotted.push(createScheduledTodo(todo, slot, date));
-        updateAvailableSlot(availableSlots, slot, todo.duration);
+        updateAvailableSlot(availableSlots, slot, todo.duration + bufferTime);
         isSlotted = true;
         break;
       }
@@ -218,7 +222,7 @@ function sortByDeadlineAndDuration(todos) {
 
 
 // Mark array indices as occupied by existing events
-async function markOccupiedTimeSlots(occupiedMinutes, googleCalendarEvents, date) {
+async function markOccupiedTimeSlots(occupiedMinutes, googleCalendarEvents, date, bufferTime) {
   const currentDate = new Date();
   if (date.getDay() === currentDate.getDay()) {
     const currentTime = getMinuteOfDay(currentDate);
@@ -231,7 +235,7 @@ async function markOccupiedTimeSlots(occupiedMinutes, googleCalendarEvents, date
     const startMinute = getMinuteOfDay(event.start);
     const endMinute = getMinuteOfDay(event.end);
     console.log("Block out interval from: ", startMinute, " to ", endMinute);
-    for (let i = startMinute; i < endMinute; i++) {
+    for (let i = startMinute; i < endMinute + bufferTime; i++) {
       occupiedMinutes[i] = true;
     }
   });
@@ -283,8 +287,8 @@ function createAvailableTimeSlots(occupiedMinutes) {
   return availableSlots;
 }
 
-function canFitTodo(todo, slot) {
-  return slot.endTime - slot.startTime >= todo.duration;
+function canFitTodo(todo, slot, bufferTime) {
+  return slot.endTime - slot.startTime >= todo.duration + bufferTime;
 }
 
 function createScheduledTodo(todo, slot, date) {
