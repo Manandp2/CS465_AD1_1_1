@@ -390,6 +390,7 @@ export default function Home({ setPage }) {
         schedChecked={schedChecked}
         setSchedChecked={setSchedChecked}
         completeTasks={completeTasksFromFirestore}
+        calendarId={calendarId}
       />
     </div>
   );

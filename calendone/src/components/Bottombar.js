@@ -17,7 +17,9 @@ import EventBusyIcon from "@mui/icons-material/EventBusy";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 
 import { auth, db } from "../utils/firebase";
-import { doc, deleteDoc } from "firebase/firestore";
+import { doc, deleteDoc, getDoc } from "firebase/firestore";
+
+import { removeFromGoogleCalendar } from "../utils/calendoneAmogus";
 
 export default function Bottombar({
   status,
@@ -32,6 +34,7 @@ export default function Bottombar({
   unCompleteTasks,
   deleteCompletedTasks,
   completeTasks,
+  calendarId
 }) {
   let selectedList;
   switch (status) {
@@ -45,17 +48,36 @@ export default function Bottombar({
       selectedList = unSchedChecked.concat(schedChecked);
   }
 
-  const deleteToDoFromFirestore = (task_id) => {
+  const deleteToDoFromFirestore = async (task_id) => {
     const taskDocRef = doc(db, "users", auth.currentUser.uid, "tasks", task_id);
-    deleteDoc(taskDocRef);
+    await deleteDoc(taskDocRef);
   };
 
   const handleDelete = () => {
     // deleteToDoFromFirestore("OVDCAnvF3Re5LaCsbH1w")
     // Delete each listItem through firestore
     selectedList.map((task_id) => {
-      // Delete each list item here
-      deleteToDoFromFirestore(task_id);
+      // Get each task
+      const tasksCollectionPath = `users/${auth.currentUser.uid}/tasks`;
+      const taskDocRef = doc(db, tasksCollectionPath, task_id)
+      getDoc(taskDocRef)
+        .then((docSnapshot) => {
+          const task = docSnapshot.data();
+          if (task.isScheduled) {
+            removeFromGoogleCalendar(calendarId, task.gCalId)
+            deleteToDoFromFirestore(task_id).then(() => {
+              getTasks();
+            })
+          } else {
+            // Delete each list item here
+            deleteToDoFromFirestore(task_id).then(() => {
+              getTasks();
+            });
+          }
+        })
+        .catch((error) => {
+          console.error(error);
+        });
     });
 
     // Reset the checkedlists to bring back the unselected bottom bar
