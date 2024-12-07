@@ -43,7 +43,7 @@ function SignIn(props) {
         const data = userDoc.data();
         if (!data.startTime) {
           transaction.update(userDocRef, {
-            startTime: dayjs('2024-12-06T8:00').toDate(),
+            startTime: dayjs('2024-12-06T10:00').toDate(),
             endTime: dayjs('2024-12-06T18:00').toDate(),
           });
           console.log("watchTime saved");
