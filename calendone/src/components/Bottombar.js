@@ -31,6 +31,7 @@ export default function Bottombar({
   setUnschedChecked,
   schedChecked,
   setSchedChecked,
+  completedChecked,
   unCompleteTasks,
   deleteCompletedTasks,
   completeTasks,
@@ -46,6 +47,8 @@ export default function Bottombar({
       break;
     case "HomeMixed":
       selectedList = unSchedChecked.concat(schedChecked);
+    case "Selected Completed":
+      selectedList = completedChecked;
   }
 
   const deleteToDoFromFirestore = async (task_id) => {
@@ -171,7 +174,7 @@ export default function Bottombar({
         )}
         {status === "Selected Completed" && (
           <>
-            <IconButton sx={{ color: "white" }} onClick={deleteCompletedTasks}>
+            <IconButton sx={{ color: "white" }} onClick={handleDelete}>
               <DeleteIcon sx={{ fontSize: "170%" }} />
             </IconButton>
             <IconButton sx={{ color: "white" }} onClick={unCompleteTasks}>

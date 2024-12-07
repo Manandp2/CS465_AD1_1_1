@@ -205,6 +205,8 @@ export default function Completed({ setPage }) {
         <Bottombar
           status={"Selected Completed"}
           setPage={setPage}
+          getTasks={getTasks}
+          completedChecked={completedChecked}
           unCompleteTasks={unCompleteTasks}
           deleteCompletedTasks={deleteTasksFromFirestore}
         />
