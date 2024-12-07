@@ -61,7 +61,7 @@ const getGoogleCalendarEvents = async (accessToken) => {
 
 
 // Helper function to send a slotted Todo to Google Calendar
-async function sendToGoogleCalendar(todo) {
+async function sendToGoogleCalendar(calendarId, todo) {
   try {
     const event = {
       summary: todo.name,
@@ -76,7 +76,7 @@ async function sendToGoogleCalendar(todo) {
     };
 
     const request = gapi.client.calendar.events.insert({
-      calendarId: 'primary', // Use the user's primary calendar
+      calendarId: calendarId, // Use the user's primary calendar
       resource: event
     });
 
@@ -135,8 +135,24 @@ export default async function scheduleTodos(unscheduledTodos, accessToken) {
     console.log("unslkdjsiojdo", unslottedTodos);
     // Send slotted todos to Google Calendar after generating time slots
     if (slottedTodos.length > 0) {
+
+      const userDocRef = doc(db, "users", auth.currentUser.uid);
+      let calendarId = "primary"; // Default to primary if not found
+
+      try {
+        const userDocSnap = await getDoc(userDocRef);
+        if (userDocSnap.exists()) {
+          const userData = userDocSnap.data();
+          if (userData.calendarId) {
+            calendarId = userData.calendarId;
+          }
+        }
+      } catch (error) {
+        console.error("Error getting calendarId from Firestore:", error);
+      }
+
       const sendToCalendarPromises = slottedTodos.map(async (todo) => {
-        await sendToGoogleCalendar(todo);
+        await sendToGoogleCalendar(calendarId, todo);
       });
 
       await Promise.all(sendToCalendarPromises);
