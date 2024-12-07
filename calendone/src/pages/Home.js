@@ -27,11 +27,13 @@ export default function Home({ setPage }) {
   const [unschedChecked, setUnschedChecked] = React.useState([]);
   const [schedChecked, setSchedChecked] = React.useState([]);
 
-  const [newCompletedExist, setNewCompletedExist] = React.useState(false);
+  const [newCompletedExist, setNewCompletedExist] = React.useState(true);
 
   const [accessToken, setAccessToken] = useState("");
   const [eventsFromCalendar, setEventsFromCalendar] = useState([]);
   const [calendarId, setCalendarId] = useState("");
+
+  const [recapChecked, setRecapChecked] = React.useState([]);
   const [recapEvents, setRecapEvents] = useState([]);
 
   const checkEventsForRecap = async (calendarId, scheduledTasks) => {
@@ -53,7 +55,7 @@ export default function Home({ setPage }) {
           } else {
             console.log(`Event retrieved with Google Calendar ID: ${event.id}`);
             const eventEnd = new Date(event.end.dateTime);
-            resolve({endTime: eventEnd, id: task.id});
+            resolve({ endTime: eventEnd, id: task.id });
           }
         });
       });
@@ -67,10 +69,9 @@ export default function Home({ setPage }) {
       console.error("Error fetching events:", error);
     }
 
-
     const now = new Date();
     setRecapEvents([]);
-    eventEnds.forEach(eventEnd => {
+    eventEnds.forEach((eventEnd) => {
       if (eventEnd.endTime < now) {
         setRecapEvents((prevRecapEvents) => [...prevRecapEvents, eventEnd.id]);
       }
@@ -187,7 +188,7 @@ export default function Home({ setPage }) {
       const l = await getTasks();
       const c = await getAccessToken();
       await checkEventsForRecap(c, l);
-    }
+    };
     fetchData();
   }, []);
 
@@ -291,14 +292,25 @@ export default function Home({ setPage }) {
 
   return (
     <div>
-      <RecapDialog open={newCompletedExist} setOpen={setNewCompletedExist} />
+      <RecapDialog
+        open={newCompletedExist}
+        setOpen={setNewCompletedExist}
+        taskList={recapEvents}
+        checked={recapChecked}
+        setChecked={setRecapChecked}
+      />
       <Paper square elevation={3} sx={{ backgroundColor: "white", color: "white", paddingY: "3%" }}>
         <Typography variant="h4">PLACEHOLDER</Typography>
       </Paper>
       <Paper variant="outlined" square elevation={0} sx={{ overflowY: "scroll" }}>
-         <Button onClick={() => {
-           scheduleTodos(unschedChecked, accessToken).then(() => getTasks())
-         }}> REAL SCHEDULE BUTTON </Button>
+        <Button
+          onClick={() => {
+            scheduleTodos(unschedChecked, accessToken).then(() => getTasks());
+          }}
+        >
+          {" "}
+          REAL SCHEDULE BUTTON{" "}
+        </Button>
         <Accordion disableGutters defaultExpanded>
           <AccordionSummary expandIcon={<ArrowDropDownIcon />} aria-controls="panel1-content" id="panel1-header">
             <Checkbox
