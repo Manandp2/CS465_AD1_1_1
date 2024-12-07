@@ -1,8 +1,9 @@
 import React from "react";
-import { Button, Paper, Typography, Box } from "@mui/material";
-import { auth, db } from "../utils/firebase";
-import { signInWithPopup, GoogleAuthProvider } from "firebase/auth";
-import { doc, setDoc, runTransaction } from "firebase/firestore";
+import {Box, Button, Paper, Typography} from "@mui/material";
+import {auth, db} from "../utils/firebase";
+import {GoogleAuthProvider, signInWithPopup} from "firebase/auth";
+import {doc, runTransaction, setDoc} from "firebase/firestore";
+import {gapi} from "gapi-script";
 
 import dayjs from 'dayjs';
 
@@ -56,28 +57,77 @@ function SignIn(props) {
       console.error("Transaction failed: ", error);
     }
   };
-  const signInWithGoogle = () => {
+
+  const getGoogleCalendars = async (accessToken) => {
+    await new Promise((resolve) =>
+      gapi.load("client:auth2", resolve)
+    );
+
+    await gapi.client.init({
+      apiKey: "AIzaSyDZYd2i-rX4oN_7i2AeSwGeJ0Uq2jo_Rng",
+      clientId: "614127097265-pdklurnj0e83fnd2m6s797gq67c1u4aq.apps.googleusercontent.com",
+      discoveryDocs: ["https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest"],
+      scope: "https://www.googleapis.com/auth/calendar",
+    });
+
+    gapi.auth.setToken({ access_token: accessToken });
+
+    try {
+      const response = await gapi.client.calendar.calendarList.list();
+      return response.result.items;
+    } catch (error) {
+      console.error("Error fetching calendars:", error);
+    }
+  };
+
+
+
+
+  const signInWithGoogle = async () => {
     const provider = new GoogleAuthProvider();
     provider.addScope("https://www.googleapis.com/auth/calendar");
-    signInWithPopup(auth, provider)
-    .then((result) => {
+
+    try {
+      const result = await signInWithPopup(auth, provider);
       const cred = GoogleAuthProvider.credentialFromResult(result);
       props.setHasSignedIn(true);
+      props.setPage("Loading");
 
-      setDoc(
+      // Initialize gapi client
+
+      // List and check for existing calendar
+      const calendars = await getGoogleCalendars(cred.accessToken);
+      const calendoneCalendar = calendars.find(calendar => calendar.summary === "CalenDone");
+
+      let calendarId;
+      if (!calendoneCalendar) {
+        // Create a new CalenDone calendar since it doesn't exist
+        const newCalendar = await gapi.client.calendar.calendars.insert({
+          resource: {
+            summary: "CalenDone"
+          }
+        });
+        calendarId = newCalendar.result.id;
+      } else {
+        calendarId = calendoneCalendar.id;
+      }
+
+      // Save the calendarId and accessToken to Firestore
+      await setDoc(
         doc(db, "users", result.user.uid),
         {
           accessToken: cred.accessToken,
+          calendarId: calendarId,
         },
         { merge: true }
-      ).then(() => {
-        console.log("accessToken saved", cred.accessToken);
-        return updateStartTimeIfNotExists(result.user.uid); // Call the new function
-      })
-    })
-    .catch((error) => {
-      console.error(error);
-    });
+      );
+      console.log("calendarId and accessToken saved");
+
+      // Update Firestore with start time if it does not exist
+      await updateStartTimeIfNotExists(result.user.uid);
+    } catch (error) {
+      console.error("Error during signInWithGoogle", error);
+    }
   };
 
   return (
