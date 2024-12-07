@@ -304,14 +304,6 @@ export default function Home({ setPage }) {
         <Typography variant="h4">PLACEHOLDER</Typography>
       </Paper>
       <Paper variant="outlined" square elevation={0} sx={{ overflowY: "scroll" }}>
-        <Button
-          onClick={() => {
-            scheduleTodos(unschedChecked, accessToken).then(() => getTasks());
-          }}
-        >
-          {" "}
-          REAL SCHEDULE BUTTON{" "}
-        </Button>
         <Accordion disableGutters defaultExpanded>
           <AccordionSummary expandIcon={<ArrowDropDownIcon />} aria-controls="panel1-content" id="panel1-header">
             <Checkbox
@@ -389,7 +381,9 @@ export default function Home({ setPage }) {
         status={bottomBarStatus}
         setPage={setPage}
         getTasks={getTasks}
-        scheduleTasks={scheduleTasksFromFirestore}
+        scheduleTasks={() => {
+          scheduleTodos(unschedChecked, accessToken).then(() => getTasks());
+        }}
         unscheduleTasks={unscheduleTasksFromFirestore}
         unSchedChecked={unschedChecked}
         setUnschedChecked={setUnschedChecked}
