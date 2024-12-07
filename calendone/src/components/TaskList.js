@@ -30,7 +30,7 @@ export default function TaskList({ taskList, checked, setChecked, getTasks }) {
 
   return (
     <List sx={{ width: "100%", bgcolor: "background.paper" }}>
-      {taskList.map(({ name, description, dueDate, duration, isScheduled, isComplete, id, gCalId }, i) => {
+      {taskList.map(({ name, description, dueDate, duration, isScheduled, isComplete, id, gCalId, endTime, startTime }, i) => {
         const labelId = `checkbox-list-label-${id}`;
         if (i === 0) {
           return (
@@ -70,7 +70,22 @@ export default function TaskList({ taskList, checked, setChecked, getTasks }) {
                   primary={name}
                   secondary={
                     isScheduled
-                      ? "SHCELDUED TIME"
+                      ? "Scheduled: " +
+                      startTime.toLocaleDateString(undefined, {
+                        month: "numeric",
+                        day: "numeric"
+                      })
+                      + " at " +
+                      startTime.toLocaleTimeString([], {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                        hour12: true,
+                      }) + " - " +
+                      endTime.toLocaleTimeString([], {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                        hour12: true,
+                      })
                       : "Due: " +
                         dueDate.toLocaleDateString() +
                         " at " +

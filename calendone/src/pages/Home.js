@@ -8,7 +8,7 @@ import AccordionSummary from "@mui/material/AccordionSummary";
 import AccordionDetails from "@mui/material/AccordionDetails";
 import Typography from "@mui/material/Typography";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
-import { Button, Checkbox, Paper } from "@mui/material";
+import { Checkbox, Paper } from "@mui/material";
 
 import { auth, db } from "../utils/firebase";
 import { collection, doc, getDoc, getDocs, writeBatch } from "firebase/firestore";
@@ -64,7 +64,6 @@ export default function Home({ setPage }) {
     try {
       const results = await Promise.all(promises);
       eventEnds.push(...results);
-      console.log("Event ends:", eventEnds);
     } catch (error) {
       console.error("Error fetching events:", error);
     }
@@ -141,10 +140,22 @@ export default function Home({ setPage }) {
       // Reset the tasks arrays
       setUnscheduledTasks([]);
       setScheduledTasks([]);
-      let localTasks = [];
+      let localScheduledTasks = [];
+      let promises = [];
+
+      const docRef = doc(db, "users", auth.currentUser.uid);
+      let calendarId;
+      try {
+        const docSnap = await getDoc(docRef);
+        const data = docSnap.data();
+        calendarId = data.calendarId;
+      } catch (error) {
+      }
+
+
       querySnapshot.forEach((doc) => {
         const task = doc.data();
-        const fullTask = {
+        let fullTask = {
           name: task.name,
           description: task.description,
           dueDate: task.dueDate.toDate(),
@@ -156,13 +167,36 @@ export default function Home({ setPage }) {
         };
 
         if (task.isScheduled && !task.isComplete) {
-          localTasks.push(fullTask);
-          setScheduledTasks((prev) => [...prev, fullTask]);
+          localScheduledTasks.push(fullTask);
+
+          // Fetch the event end time from Google Calendar
+          const promise = new Promise((resolve) => {
+            const request = gapi.client.calendar.events.get({
+              calendarId: calendarId,
+              eventId: task.gCalId,
+            });
+//https://content.googleapis.com/calendar/v3/calendars//events/l8k6lpmuki4sln35m40lp9u1do?key=AIzaSyDZYd2i-rX4oN_7i2AeSwGeJ0Uq2jo_Rng
+            request.execute((event) => {
+              if (!event.error) {
+                fullTask.endTime = new Date(event.end.dateTime);
+                fullTask.startTime = new Date(event.start.dateTime);
+                resolve(fullTask);
+              } else {
+                console.log(event.error);
+                resolve(fullTask);
+              }
+            });
+          });
+
+          promises.push(promise);
         } else if (!task.isScheduled && !task.isComplete) {
           setUnscheduledTasks((prev) => [...prev, fullTask]);
         }
       });
-      return localTasks;
+      const scheduledTasksWithEndTimes = await Promise.all(promises);
+      console.log("scheduledTasksWithEndTimes", scheduledTasksWithEndTimes);
+      setScheduledTasks(scheduledTasksWithEndTimes);
+      return localScheduledTasks;
     } catch (error) {
       console.log(error);
     }
