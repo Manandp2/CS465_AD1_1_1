@@ -179,7 +179,6 @@ export default async function scheduleTodos(unscheduledTodos, accessToken) {
       await Promise.all(sendToCalendarPromises);
     }
 
-    await Promise.all(sendToCalendarPromises);
     return {slottedTodos, unslottedTodos};
 
   } catch (error) {
