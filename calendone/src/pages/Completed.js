@@ -10,11 +10,11 @@ import Accordion from "@mui/material/Accordion";
 import AccordionSummary from "@mui/material/AccordionSummary";
 import AccordionDetails from "@mui/material/AccordionDetails";
 import Typography from "@mui/material/Typography";
-import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 import { Paper, Checkbox } from "@mui/material";
 
 import { auth, db } from "../utils/firebase";
-import { collection, doc, getDocs, writeBatch } from "firebase/firestore";
+import {collection, doc, getDoc, getDocs, writeBatch} from "firebase/firestore";
+import {gapi} from 'gapi-script';
 
 function CustomTabPanel(props) {
   const { children, value, index, ...other } = props;
@@ -53,31 +53,78 @@ export default function Completed({ setPage }) {
     }
   }, [allCompletedChecked]);
 
-  const getTasks = () => {
+  const getTasks = async () => {
     const tasksCollectionRef = collection(db, "users", auth.currentUser.uid, "tasks");
-    getDocs(tasksCollectionRef)
-      .then((querySnapshot) => {
-        setCompletedTasks([]);
-        querySnapshot.forEach((doc) => {
-          const task = doc.data();
-          const fullTask = {
-            name: task.name,
-            description: task.description,
-            dueDate: task.dueDate.toDate(),
-            duration: task.duration,
-            isScheduled: task.isScheduled,
-            isComplete: task.isComplete,
-            id: doc.id,
-            gCalId: task.gCalId,
-          };
-          if (task.isComplete) {
-            setCompletedTasks((prev) => [...prev, fullTask]);
-          }
-        });
-      })
-      .catch((error) => {
-        console.log(error);
+
+    try {
+      const querySnapshot = await getDocs(tasksCollectionRef);
+
+      // Reset the tasks arrays
+      setCompletedTasks([]);
+      let localScheduledTasks = [];
+      let promises = [];
+
+      const docRef = doc(db, "users", auth.currentUser.uid);
+      let calendarId;
+      try {
+        const docSnap = await getDoc(docRef);
+        const data = docSnap.data();
+        calendarId = data.calendarId;
+      } catch (error) {
+      }
+
+
+      querySnapshot.forEach((doc) => {
+        const task = doc.data();
+        let fullTask = {
+          name: task.name,
+          description: task.description,
+          dueDate: task.dueDate.toDate(),
+          duration: task.duration,
+          isScheduled: task.isScheduled,
+          isComplete: task.isComplete,
+          id: doc.id,
+          gCalId: task.gCalId,
+        };
+
+        if (task.isScheduled && task.isComplete) {
+          localScheduledTasks.push(fullTask);
+
+          // Fetch the event end time from Google Calendar
+          const promise = new Promise((resolve) => {
+            const request = gapi.client.calendar.events.get({
+              calendarId: calendarId,
+              eventId: task.gCalId,
+            });
+//https://content.googleapis.com/calendar/v3/calendars//events/l8k6lpmuki4sln35m40lp9u1do?key=AIzaSyDZYd2i-rX4oN_7i2AeSwGeJ0Uq2jo_Rng
+            request.execute((event) => {
+              if (!event.error) {
+                fullTask.endTime = new Date(event.end.dateTime);
+                fullTask.startTime = new Date(event.start.dateTime);
+                resolve(fullTask);
+              } else {
+                console.log(event.error);
+                resolve(fullTask);
+              }
+            });
+          });
+
+          promises.push(promise);
+        } else if (!task.isScheduled && task.isComplete) {
+          // setCompletedTasks((prev) => [...prev, fullTask]);
+          const promise = new Promise((resolve) => {
+            resolve(fullTask);
+          })
+          promises.push(promise);
+        }
       });
+      const scheduledTasksWithEndTimes = await Promise.all(promises);
+      console.log("scheduledTasksWithEndTimes", scheduledTasksWithEndTimes);
+      setCompletedTasks(scheduledTasksWithEndTimes);
+      return localScheduledTasks;
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   const unCompleteTasks = () => {
@@ -158,6 +205,8 @@ export default function Completed({ setPage }) {
         <Bottombar
           status={"Selected Completed"}
           setPage={setPage}
+          getTasks={getTasks}
+          completedChecked={completedChecked}
           unCompleteTasks={unCompleteTasks}
           deleteCompletedTasks={deleteTasksFromFirestore}
         />

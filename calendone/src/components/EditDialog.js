@@ -26,11 +26,14 @@ export default function EditDialog({
 }) {
   const [open, setOpen] = React.useState(false);
   const handleOpen = () => setOpen(true);
-  const handleClose = () => {
+  const handleCancel = () => {
     setNewDuration(duration);
     setNewDueDate(dayjs(dueDate));
     setNewTaskName(name);
     setNewTaskDescription(description);
+    setOpen(false);
+  };
+  const handleSubmit = () => {
     setOpen(false);
   };
 
@@ -70,13 +73,13 @@ export default function EditDialog({
       <Dialog
         fullWidth
         open={open}
-        onClose={handleClose}
+        onClose={handleCancel}
         PaperProps={{
           component: "form",
           onSubmit: (event) => {
             event.preventDefault();
             editTodoInFirestore();
-            handleClose();
+            handleSubmit();
           },
         }}
       >
@@ -137,7 +140,7 @@ export default function EditDialog({
 
         {/* </Paper> */}
         <DialogActions>
-          <Button onClick={handleClose}>CANCEL</Button>
+          <Button onClick={handleCancel}>CANCEL</Button>
           <Button type="submit">SUBMIT</Button>
         </DialogActions>
       </Dialog>

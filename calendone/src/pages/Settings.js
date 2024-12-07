@@ -57,7 +57,7 @@ function WorkTimesAccordion() {
     }
 
     return (
-        <Accordion disableGutters defaultExpanded>
+        <Accordion disableGutters>
             <AccordionSummary expandIcon={<ArrowDropDownIcon />} aria-controls="panel1-1-content" id="panel1-1-header">
                 <Typography sx={{ width: '33%', flexShrink: 0 }}>
                     Work Time
@@ -127,7 +127,7 @@ function BufferTimeAccordion() {
     }
 
     return (
-        <Accordion disableGutters defaultExpanded>
+        <Accordion disableGutters>
             <AccordionSummary expandIcon={<ArrowDropDownIcon />} aria-controls="panel1-1-content" id="panel1-1-header">
                 <Typography sx={{ width: '33%', flexShrink: 0 }}>
                     Buffer Time

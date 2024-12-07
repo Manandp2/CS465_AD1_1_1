@@ -1,26 +1,21 @@
-import React, { useState } from "react";
+import React from "react";
 import {
   Dialog,
   DialogActions,
   DialogContentText,
   DialogContent,
   DialogTitle,
-  Modal,
-  Paper,
-  IconButton,
-  Typography,
-  FormGroup,
-  FormControlLabel,
   Checkbox,
   Button,
-  Stack,
 } from "@mui/material";
 import List from "@mui/material/List";
 import ListItem from "@mui/material/ListItem";
 import ListItemButton from "@mui/material/ListItemButton";
 import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
-import EditDialog from "./EditDialog";
+import {doc, getDoc, writeBatch} from 'firebase/firestore';
+import {auth, db} from '../utils/firebase';
+import {removeFromGoogleCalendar} from '../utils/calendoneAmogus';
 
 export default function RecapDialog({ open, setOpen, taskList, checked, setChecked, getTasks }) {
   const handleClose = () => setOpen(false);
@@ -53,6 +48,47 @@ export default function RecapDialog({ open, setOpen, taskList, checked, setCheck
     console.log(newChecked);
   };
 
+// Initial check for all tasks when component mounts
+  React.useEffect(() => {
+    const allTaskIds = taskList.map(task => task.id);
+    setChecked(allTaskIds);
+  }, [taskList]);
+
+
+  const updateTasksInFirestore = async () => {
+    const batch = writeBatch(db);
+    const tasksCollectionPath = `users/${auth.currentUser.uid}/tasks`;
+
+    const docRef = doc(db, "users", auth.currentUser.uid);
+    let calendarId;
+    try {
+      const docSnap = await getDoc(docRef);
+      const data = docSnap.data();
+      calendarId = data.calendarId;
+    } catch (error) {
+    }
+
+    taskList.forEach((task) => {
+      const taskDocRef = doc(db, tasksCollectionPath, task.id); // Create a reference to the document
+      console.log(task.id);
+      if (checked.indexOf(task.id) !== -1) {
+        batch.update(taskDocRef, { isComplete: true }); // Add the update operation to the batch
+      } else {
+
+        removeFromGoogleCalendar(calendarId, task.gCalId)
+        batch.update(taskDocRef, { isScheduled: false, gCalId: null }); // Add the update operation to the batch
+      }
+    });
+
+    try {
+      await batch.commit();
+      console.log("Tasks successfully updated in Firestore");
+    } catch (error) {
+      console.error("Error updating tasks in Firestore: ", error);
+    }
+  };
+
+  
   return (
     // <Modal open={open} onClose={onClose} aria-labelledby="recap-modal-title" aria-describedby="recap-modal-description">
     <Dialog
@@ -64,7 +100,10 @@ export default function RecapDialog({ open, setOpen, taskList, checked, setCheck
         onSubmit: (event) => {
           event.preventDefault();
           // editTodoInFirestore();
-          handleClose();
+          updateTasksInFirestore().then(() =>{
+            getTasks();
+            handleClose();
+          });
         },
       }}
     >
@@ -73,14 +112,14 @@ export default function RecapDialog({ open, setOpen, taskList, checked, setCheck
       <DialogContent>
         <DialogContentText>De-select incomplete tasks</DialogContentText>
         <List sx={{ width: "100%", bgcolor: "background.paper" }}>
-          {taskList.map(({ name, description, dueDate, duration, isScheduled, isComplete, id, gCalId }, i) => {
+          {taskList.map(({ name, description, dueDate, duration, isScheduled, isComplete, id, gCalId, endTime, startTime }, i) => {
             const labelId = `checkbox-list-label-${id}`;
             if (i === 0) {
               return (
                 <ListItem
                   key={id}
                   // disablePadding
-                  sx={{ paddingY: 0, marginTop: -2 }}
+                  sx={{ paddingY: 0, marginTop: 0 }}
                 >
                   <ListItemButton role={undefined} onClick={handleToggle(id)} dense>
                     <ListItemIcon>
@@ -97,7 +136,22 @@ export default function RecapDialog({ open, setOpen, taskList, checked, setCheck
                       primary={name}
                       secondary={
                         isScheduled
-                          ? "SHCELDUED TIME"
+                          ? "Scheduled: " +
+                          startTime.toLocaleDateString(undefined, {
+                            month: "numeric",
+                            day: "numeric"
+                          })
+                          + " at " +
+                          startTime.toLocaleTimeString([], {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                            hour12: true,
+                          }) + " - " +
+                          endTime.toLocaleTimeString([], {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                            hour12: true,
+                          })
                           : "Due: " +
                             dueDate.toLocaleDateString() +
                             " at " +
@@ -133,7 +187,22 @@ export default function RecapDialog({ open, setOpen, taskList, checked, setCheck
                     primary={name}
                     secondary={
                       isScheduled
-                        ? "SHCELDUED TIME"
+                        ? "Scheduled: " +
+                        startTime.toLocaleDateString(undefined, {
+                          month: "numeric",
+                          day: "numeric"
+                        })
+                        + " at " +
+                        startTime.toLocaleTimeString([], {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                          hour12: true,
+                        }) + " - " +
+                        endTime.toLocaleTimeString([], {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                          hour12: true,
+                        })
                         : "Due: " +
                           dueDate.toLocaleDateString() +
                           " at " +
@@ -153,7 +222,7 @@ export default function RecapDialog({ open, setOpen, taskList, checked, setCheck
 
       {/* Footer Buttons */}
       <DialogActions>
-        <Button onClick={handleClose}>DONE</Button>
+        <Button type={"submit"}>DONE</Button>
       </DialogActions>
     </Dialog>
   );
