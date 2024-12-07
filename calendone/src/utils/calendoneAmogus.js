@@ -1,127 +1,113 @@
-import {collection, doc, getDoc} from "firebase/firestore";
+import {doc, getDoc} from "firebase/firestore";
 import {auth, db} from "./firebase";
 import {gapi} from 'gapi-script';
 
 
-const getGoogleCalendarEvents = (accessToken) => {
-  return new Promise((resolve, reject) => {
-    gapi.load("client:auth2", () => {
-      gapi.client
-      .init({
-        apiKey: "AIzaSyDZYd2i-rX4oN_7i2AeSwGeJ0Uq2jo_Rng",
-        clientId: "614127097265-pdklurnj0e83fnd2m6s797gq67c1u4aq.apps.googleusercontent.com",
-        discoveryDocs: ["https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest"],
-        scope: "https://www.googleapis.com/auth/calendar",
-      })
-      .then(() => {
-        gapi.auth.setToken({ access_token: accessToken });
-        let eventsFromCalendar = [];
-        gapi.client.calendar.calendarList
-        .list()
-        .then((response) => {
-          const calendars = response.result.items;
-          let promises = [];
-          if (calendars.length > 0) {
-            calendars.forEach((calendar) => {
-              const calendarId = calendar.id;
-              const fetchEventsPromise = gapi.client.calendar.events
-              .list({
-                calendarId: calendarId,
-                timeMin: new Date().toISOString(),
-                timeMax: new Date(new Date().setDate(new Date().getDate() + 7)).toISOString(),
-                singleEvents: true,
-                orderBy: "startTime",
-              })
-              .then((resp) => {
-                const events = resp.result.items;
-                events.forEach((event) => {
-                  if (event.start.dateTime && event.end.dateTime) {
-                    eventsFromCalendar.push({
-                      calendar: calendar.summary,
-                      start: new Date(event.start.dateTime),
-                      end: new Date(event.end.dateTime),
-                    });
-                  }
-                });
-              })
-              .catch((error) => {
-                console.error(`Error fetching events from calendar ${calendar.summary}:`, error);
-              });
+const getGoogleCalendarEvents = async (accessToken) => {
+  await new Promise((resolve) =>
+    gapi.load("client:auth2", resolve)
+  );
 
-              promises.push(fetchEventsPromise);
-            });
-
-            Promise.all(promises)
-            .then(() => {
-              resolve(eventsFromCalendar);
-            })
-            .catch(reject);
-          } else {
-            resolve(eventsFromCalendar); // Resolve with an empty array if no calendars
-          }
-        })
-        .catch((error) => {
-          console.error("Error fetching calendars:", error);
-          reject(error);
-        });
-      });
-    });
+  await gapi.client.init({
+    apiKey: "AIzaSyDZYd2i-rX4oN_7i2AeSwGeJ0Uq2jo_Rng",
+    clientId: "614127097265-pdklurnj0e83fnd2m6s797gq67c1u4aq.apps.googleusercontent.com",
+    discoveryDocs: ["https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest"],
+    scope: "https://www.googleapis.com/auth/calendar",
   });
+
+  gapi.auth.setToken({ access_token: accessToken });
+
+  let eventsFromCalendar = [];
+
+  try {
+    const response = await gapi.client.calendar.calendarList.list();
+    const calendars = response.result.items;
+
+    if (calendars.length > 0) {
+      const fetchEventsPromises = calendars.map(async (calendar) => {
+        try {
+          const resp = await gapi.client.calendar.events.list({
+            calendarId: calendar.id,
+            timeMin: new Date().toISOString(),
+            timeMax: new Date(new Date().setDate(new Date().getDate() + 7)).toISOString(),
+            singleEvents: true,
+            orderBy: "startTime",
+          });
+
+          const events = resp.result.items;
+          events.forEach((event) => {
+            if (event.start.dateTime && event.end.dateTime) {
+              eventsFromCalendar.push({
+                calendar: calendar.summary,
+                start: new Date(event.start.dateTime),
+                end: new Date(event.end.dateTime),
+              });
+            }
+          });
+        } catch (error) {
+          console.error(`Error fetching events from calendar ${calendar.summary}:`, error);
+        }
+      });
+
+      await Promise.all(fetchEventsPromises);
+    }
+  } catch (error) {
+    console.error("Error fetching calendars:", error);
+    throw error;
+  }
+
+  return eventsFromCalendar;
 };
 
 
-
-export default function scheduleTodos(unscheduledTodos, accessToken) {
-  // sort todos by deadline and length of duration
+export default async function scheduleTodos(unscheduledTodos, accessToken) {
   if (unscheduledTodos.length === 0) {
     return;
   }
-  getGoogleCalendarEvents(accessToken).then((result) => {
-    let events = result;
-    console.log("",events)
-    console.log(`in schedule todos, unscheduledTodos ${unscheduledTodos}`)
-    let todos = [];
-    unscheduledTodos.forEach((id) => {
-      const path = `users/${auth.currentUser.uid}/tasks`
-      const docRef = doc(db, path, id);
-      getDoc(docRef)
-      .then((result) => {
-        todos.push(result.data())
-      })
-    })
 
-    console.log(todos)
+  try {
+    const events = await getGoogleCalendarEvents(accessToken);
+    console.log("", events);
+    console.log(`in schedule todos, unscheduledTodos ${unscheduledTodos}`);
+    let todos = [];
+
+    const fetchTodosPromises = unscheduledTodos.map(async (id) => {
+      const path = `users/${auth.currentUser.uid}/tasks`;
+      const docRef = doc(db, path, id);
+      const result = await getDoc(docRef);
+      todos.push(result.data());
+    });
+
+    await Promise.all(fetchTodosPromises);
+    console.log(todos);
 
     const sortedTodos = sortByDeadlineAndDuration(todos);
+    console.log("sorted todos:", sortedTodos);
 
-    //generate dates of today and next six days
     const weekDates = generateWeekDates();
     const slottedTodos = [];
     let unslottedTodos = [...sortedTodos];
 
     for (const date of weekDates) {
-      // Initialize array for each day, with each index indicating the minute of that day in military time
-      // ex. index 0 is 00:00, index 412 is 06:52, index 1440 is 24:00
       const occupiedMinutes = new Array(1440).fill(false);
-
-      // occupy the times (array=True) for each specific day according to the preexisting GC events of that day
       const eventsForDay = filterEventsByDate(events, date);
-      console.log("events for day: ", eventsForDay)
-      markOccupiedTimeSlots(occupiedMinutes, eventsForDay);
+      console.log("events for day: ", eventsForDay);
+      await markOccupiedTimeSlots(occupiedMinutes, eventsForDay);
 
-      // create an array of timeslots unoccupied by events
       const availableSlots = createAvailableTimeSlots(occupiedMinutes);
-
-      // sort the todos that can and cannot be slotted in by the greedy algo
       const {slotted, unslotted} = scheduleForDay(unslottedTodos, availableSlots, date);
+
       slottedTodos.push(...slotted);
       unslottedTodos = unslotted;
     }
-    console.log("sloted", slottedTodos)
-    console.log("unslkdjsiojdo", unslottedTodos)
-    return {slottedTodos, unslottedTodos};
-  });
 
+    console.log("sloted", slottedTodos);
+    console.log("unslkdjsiojdo", unslottedTodos);
+
+    return {slottedTodos, unslottedTodos};
+  } catch (error) {
+    console.error("Error in scheduling todos:", error);
+  }
 }
 
 // Fit Todo in earliest timeslot possible, push to slotted if it can, unslotted if not
