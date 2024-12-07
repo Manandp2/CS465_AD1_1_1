@@ -1,8 +1,9 @@
 import React from "react";
-import { Button, Paper, Typography, Box } from "@mui/material";
-import { auth, db } from "../utils/firebase";
-import { signInWithPopup, GoogleAuthProvider } from "firebase/auth";
-import { doc, setDoc, getDoc } from "firebase/firestore";
+import {Box, Button, Paper, Typography} from "@mui/material";
+import {auth, db} from "../utils/firebase";
+import {GoogleAuthProvider, signInWithPopup} from "firebase/auth";
+import {doc, runTransaction, setDoc} from "firebase/firestore";
+import {gapi} from "gapi-script";
 
 import dayjs from 'dayjs';
 
@@ -29,43 +30,109 @@ function generateSparkles(numSparkles) {
 function SignIn(props) {
   const sparkles = generateSparkles(50);
 
-  const signInWithGoogle = () => {
+  const updateStartTimeIfNotExists = async (userId) => {
+    const userDocRef = doc(db, "users", userId);
+
+    try {
+      await runTransaction(db, async (transaction) => {
+        const userDoc = await transaction.get(userDocRef);
+
+        if (!userDoc.exists()) {
+          throw "Document does not exist!";
+        }
+
+        const data = userDoc.data();
+        if (!data.bufferTime) {
+          transaction.update(userDocRef, {
+            bufferTime: 5,
+          });
+        }
+        if (!data.startTime) {
+          transaction.update(userDocRef, {
+            startTime: dayjs('2024-12-06T10:00').toDate(),
+            endTime: dayjs('2024-12-06T18:00').toDate(),
+          });
+          console.log("watchTime saved");
+          props.setPage("Home");
+        } else {
+          props.setPage("Home");
+        }
+      });
+    } catch (error) {
+      console.error("Transaction failed: ", error);
+    }
+  };
+
+  const getGoogleCalendars = async (accessToken) => {
+    await new Promise((resolve) =>
+      gapi.load("client:auth2", resolve)
+    );
+
+    await gapi.client.init({
+      apiKey: "AIzaSyDZYd2i-rX4oN_7i2AeSwGeJ0Uq2jo_Rng",
+      clientId: "614127097265-pdklurnj0e83fnd2m6s797gq67c1u4aq.apps.googleusercontent.com",
+      discoveryDocs: ["https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest"],
+      scope: "https://www.googleapis.com/auth/calendar",
+    });
+
+    gapi.auth.setToken({ access_token: accessToken });
+
+    try {
+      const response = await gapi.client.calendar.calendarList.list();
+      return response.result.items;
+    } catch (error) {
+      console.error("Error fetching calendars:", error);
+    }
+  };
+
+
+
+
+  const signInWithGoogle = async () => {
     const provider = new GoogleAuthProvider();
     provider.addScope("https://www.googleapis.com/auth/calendar");
-    signInWithPopup(auth, provider)
-      .then((result) => {
-        const cred = GoogleAuthProvider.credentialFromResult(result);
-        props.setUser(result.user);
-        setDoc(
-          doc(db, "users", result.user.uid),
-          {
-            accessToken: cred.accessToken,
-          },
-          { merge: true }
-        ).then(() => {
-          console.log("accessToken saved");
-        });
-        getDoc(
-          doc(db, "users", result.user.uid)
-        ).then((res) => {
-          const data = res.data();
-          if (!data.startTime) {
-            setDoc(
-              doc(db, "users", result.user.uid),
-              {
-                startTime: dayjs('2024-12-06T8:00').toDate(),
-                endTime: dayjs('2024-12-06T18:00').toDate(),
-              },
-              { merge: true }
-            ).then(() => {
-              console.log("watchTime saved");
-            });
+
+    try {
+      const result = await signInWithPopup(auth, provider);
+      const cred = GoogleAuthProvider.credentialFromResult(result);
+      props.setHasSignedIn(true);
+      props.setPage("Loading");
+
+      // Initialize gapi client
+
+      // List and check for existing calendar
+      const calendars = await getGoogleCalendars(cred.accessToken);
+      const calendoneCalendar = calendars.find(calendar => calendar.summary === "CalenDone");
+
+      let calendarId;
+      if (!calendoneCalendar) {
+        // Create a new CalenDone calendar since it doesn't exist
+        const newCalendar = await gapi.client.calendar.calendars.insert({
+          resource: {
+            summary: "CalenDone"
           }
-        })
-      })
-      .catch((error) => {
-        console.log(error);
-      });
+        });
+        calendarId = newCalendar.result.id;
+      } else {
+        calendarId = calendoneCalendar.id;
+      }
+
+      // Save the calendarId and accessToken to Firestore
+      await setDoc(
+        doc(db, "users", result.user.uid),
+        {
+          accessToken: cred.accessToken,
+          calendarId: calendarId,
+        },
+        { merge: true }
+      );
+      console.log("calendarId and accessToken saved");
+
+      // Update Firestore with start time if it does not exist
+      await updateStartTimeIfNotExists(result.user.uid);
+    } catch (error) {
+      console.error("Error during signInWithGoogle", error);
+    }
   };
 
   return (

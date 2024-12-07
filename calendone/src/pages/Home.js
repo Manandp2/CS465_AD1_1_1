@@ -8,12 +8,13 @@ import AccordionSummary from "@mui/material/AccordionSummary";
 import AccordionDetails from "@mui/material/AccordionDetails";
 import Typography from "@mui/material/Typography";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
-import { Button, Checkbox, Paper } from "@mui/material";
+import { Checkbox, Paper } from "@mui/material";
 
 import { auth, db } from "../utils/firebase";
 import { collection, doc, getDoc, getDocs, writeBatch } from "firebase/firestore";
 import RecapDialog from "../components/RecapDialog";
 import { gapi } from "gapi-script";
+import scheduleTodos from "../utils/calendoneAmogus";
 
 export default function Home({ setPage }) {
   const [unscheduledTasks, setUnscheduledTasks] = useState([]);
@@ -26,27 +27,28 @@ export default function Home({ setPage }) {
   const [unschedChecked, setUnschedChecked] = React.useState([]);
   const [schedChecked, setSchedChecked] = React.useState([]);
 
-  const [newCompletedExist, setNewCompletedExist] = React.useState(true);
-
   const [accessToken, setAccessToken] = useState("");
-  const [eventsFromCalendar, setEventsFromCalendar] = useState([]);
+  const [calendarId, setCalendarId] = useState("");
 
-  const scheduleTasksFromFirestore = () => {
-    const batch = writeBatch(db); // Create a new batch instance
-    const tasksCollectionPath = `users/${auth.currentUser.uid}/tasks`;
+  const [recapChecked, setRecapChecked] = React.useState([]);
+  const [recapEvents, setRecapEvents] = useState([]);
 
-    unschedChecked.forEach((task) => {
-      const taskDocRef = doc(db, tasksCollectionPath, task); // Create a reference to the document
-      batch.update(taskDocRef, { isScheduled: true }); // Add the update operation to the batch
+  const [newCompletedExist, setNewCompletedExist] = React.useState(false);
+
+  const checkEventsForRecap = async (scheduledTasks) => {
+    const now = new Date();
+    setRecapEvents([]);
+    let ahdoahdo = false;
+    scheduledTasks.forEach((eventEnd) => {
+      if (eventEnd.endTime < now) {
+        setRecapEvents((prevRecapEvents) => [...prevRecapEvents, eventEnd]);
+        // setNewCompletedExist(true);
+        ahdoahdo = true;
+      }
     });
-
-    batch.commit().then(() => {
-      setUnschedChecked([]);
-      setAllUnschedChecked(false);
-      getTasks();
-    });
+    setNewCompletedExist(ahdoahdo);
+    // return eventEnds; // Return the array of event ends if needed
   };
-
   const unscheduleTasksFromFirestore = () => {
     const batch = writeBatch(db); // Create a new batch instance
     const tasksCollectionPath = `users/${auth.currentUser.uid}/tasks`;
@@ -84,47 +86,99 @@ export default function Home({ setPage }) {
     });
   };
 
-  const getTasks = () => {
+  const getTasks = async () => {
     const tasksCollectionRef = collection(db, "users", auth.currentUser.uid, "tasks");
-    getDocs(tasksCollectionRef)
-      .then((querySnapshot) => {
-        setUnscheduledTasks([]);
-        setScheduledTasks([]);
-        querySnapshot.forEach((doc) => {
-          const task = doc.data();
-          const fullTask = {
-            name: task.name,
-            description: task.description,
-            dueDate: task.dueDate.toDate(),
-            duration: task.duration,
-            isScheduled: task.isScheduled,
-            isComplete: task.isComplete,
-            id: doc.id,
-            gCalId: task.gCalId,
-          };
-          if (task.isScheduled && !task.isComplete) {
-            setScheduledTasks((prev) => [...prev, fullTask]);
-          } else if (!task.isScheduled && !task.isComplete) {
-            setUnscheduledTasks((prev) => [...prev, fullTask]);
-          }
-        });
-      })
-      .catch((error) => {
-        console.log(error);
+
+    try {
+      const querySnapshot = await getDocs(tasksCollectionRef);
+
+      // Reset the tasks arrays
+      setUnscheduledTasks([]);
+      setScheduledTasks([]);
+      let localScheduledTasks = [];
+      let promises = [];
+
+      const docRef = doc(db, "users", auth.currentUser.uid);
+      let calendarId;
+      try {
+        const docSnap = await getDoc(docRef);
+        const data = docSnap.data();
+        calendarId = data.calendarId;
+      } catch (error) {
+      }
+
+
+      querySnapshot.forEach((doc) => {
+        const task = doc.data();
+        let fullTask = {
+          name: task.name,
+          description: task.description,
+          dueDate: task.dueDate.toDate(),
+          duration: task.duration,
+          isScheduled: task.isScheduled,
+          isComplete: task.isComplete,
+          id: doc.id,
+          gCalId: task.gCalId,
+        };
+
+        if (task.isScheduled && !task.isComplete) {
+          localScheduledTasks.push(fullTask);
+
+          // Fetch the event end time from Google Calendar
+          const promise = new Promise((resolve) => {
+            const request = gapi.client.calendar.events.get({
+              calendarId: calendarId,
+              eventId: task.gCalId,
+            });
+//https://content.googleapis.com/calendar/v3/calendars//events/l8k6lpmuki4sln35m40lp9u1do?key=AIzaSyDZYd2i-rX4oN_7i2AeSwGeJ0Uq2jo_Rng
+            request.execute((event) => {
+              if (!event.error) {
+                fullTask.endTime = new Date(event.end.dateTime);
+                fullTask.startTime = new Date(event.start.dateTime);
+                resolve(fullTask);
+              } else {
+                console.log(event.error);
+                resolve(fullTask);
+              }
+            });
+          });
+
+          promises.push(promise);
+        } else if (!task.isScheduled && !task.isComplete) {
+          setUnscheduledTasks((prev) => [...prev, fullTask]);
+        }
       });
+      const scheduledTasksWithEndTimes = await Promise.all(promises);
+      console.log("scheduledTasksWithEndTimes", scheduledTasksWithEndTimes);
+      setScheduledTasks(scheduledTasksWithEndTimes);
+      return localScheduledTasks;
+    } catch (error) {
+      console.log(error);
+    }
   };
 
-  const getAccessToken = () => {
+  const getAccessToken = async () => {
     const docRef = doc(db, "users", auth.currentUser.uid);
-    getDoc(docRef).then((doc) => {
-      const data = doc.data();
+
+    try {
+      const docSnap = await getDoc(docRef);
+      const data = docSnap.data();
+
       setAccessToken(data.accessToken);
-    });
+      setCalendarId(data.calendarId);
+      return data.calendarId;
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   useEffect(() => {
-    getTasks();
-    getAccessToken();
+    const fetchData = async () => {
+      const l = await getTasks();
+      await getAccessToken();
+      await checkEventsForRecap(l);
+    };
+    fetchData();
   }, []);
 
   useEffect(() => {
@@ -163,76 +217,20 @@ export default function Home({ setPage }) {
     }
     // console.log("BRUH", sLen, uLen);
   }, [schedChecked, unschedChecked]);
-
-  const getGoogleCalendarEvents = () => {
-    gapi.load("client:auth2", () => {
-      gapi.client
-        .init({
-          apiKey: "AIzaSyDZYd2i-rX4oN_7i2AeSwGeJ0Uq2jo_Rng",
-          clientId: "614127097265-pdklurnj0e83fnd2m6s797gq67c1u4aq.apps.googleusercontent.com",
-          discoveryDocs: ["https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest"],
-          scope: "https://www.googleapis.com/auth/calendar",
-        })
-        .then(() => {
-          gapi.auth.setToken({ access_token: accessToken });
-
-          gapi.client.calendar.calendarList
-            .list()
-            .then((response) => {
-              setEventsFromCalendar([]);
-              const calendars = response.result.items;
-              if (calendars.length > 0) {
-                calendars.forEach((calendar) => {
-                  const calendarId = calendar.id;
-
-                  // Retrieve events for each calendar
-                  gapi.client.calendar.events
-                    .list({
-                      calendarId: calendarId,
-                      timeMin: new Date().toISOString(),
-                      timeMax: new Date(new Date().setDate(new Date().getDate() + 7)).toISOString(),
-                      singleEvents: true,
-                      orderBy: "startTime",
-                    })
-                    .then((resp) => {
-                      const events = resp.result.items;
-                      events.forEach((event) => {
-                        if (event.start.dateTime && event.end.dateTime) {
-                          // not a whole-day event
-                          console.log(new Date(event.start.dateTime));
-                          console.log(event.end.dateTime);
-                          setEventsFromCalendar((prev) => [
-                            ...prev,
-                            {
-                              calendar: calendar.summary,
-                              start: new Date(event.start.dateTime),
-                              end: new Date(event.end.dateTime),
-                            },
-                          ]);
-                        }
-                      });
-                    })
-                    .catch((error) => {
-                      console.error(`Error fetching events from calendar ${calendar.summary}:`, error);
-                    });
-                });
-              }
-            })
-            .catch((error) => {
-              console.error("Error fetching calendars:", error);
-            });
-        });
-    });
-  };
-
   return (
     <div>
-      <RecapDialog open={newCompletedExist} setOpen={setNewCompletedExist} />
+      <RecapDialog
+        open={newCompletedExist}
+        setOpen={setNewCompletedExist}
+        taskList={recapEvents}
+        checked={recapChecked}
+        setChecked={setRecapChecked}
+        getTasks={getTasks}
+      />
       <Paper square elevation={3} sx={{ backgroundColor: "white", color: "white", paddingY: "3%" }}>
         <Typography variant="h4">PLACEHOLDER</Typography>
       </Paper>
       <Paper variant="outlined" square elevation={0} sx={{ overflowY: "scroll" }}>
-        {/* <Button onClick={getGoogleCalendarEvents}>Get events</Button> */}
         <Accordion disableGutters defaultExpanded>
           <AccordionSummary expandIcon={<ArrowDropDownIcon />} aria-controls="panel1-content" id="panel1-header">
             <Checkbox
@@ -310,13 +308,16 @@ export default function Home({ setPage }) {
         status={bottomBarStatus}
         setPage={setPage}
         getTasks={getTasks}
-        scheduleTasks={scheduleTasksFromFirestore}
+        scheduleTasks={() => {
+          scheduleTodos(unschedChecked, accessToken).then(() => getTasks());
+        }}
         unscheduleTasks={unscheduleTasksFromFirestore}
         unSchedChecked={unschedChecked}
         setUnschedChecked={setUnschedChecked}
         schedChecked={schedChecked}
         setSchedChecked={setSchedChecked}
         completeTasks={completeTasksFromFirestore}
+        calendarId={calendarId}
       />
     </div>
   );
