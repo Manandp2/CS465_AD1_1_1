@@ -75,10 +75,15 @@ async function sendToGoogleCalendar(calendarId, todo) {
       calendarId: calendarId, // Use the user's primary calendar
       resource: event
     });
-
-    await request.execute((event) => {
-
-      console.log(`Event created with Google Calendar ID: ${event.id}`);
+    return await new Promise((resolve, reject) => {
+      request.execute((event) => {
+        if (event.error) {
+          reject(event.error);
+        } else {
+          console.log(`Event created with Google Calendar ID: ${event.id}`);
+          resolve(event.id);
+        }
+      });
     });
   } catch (error) {
     console.error("Error sending todo to Google Calendar:", error);
@@ -150,18 +155,11 @@ export default async function scheduleTodos(unscheduledTodos, accessToken) {
     // Send slotted todos to Google Calendar after generating time slots
     if (slottedTodos.length > 0) {
       const sendToCalendarPromises = slottedTodos.map(async (todo) => {
-        await sendToGoogleCalendar(calendarId, todo);
+        const gCalId = await sendToGoogleCalendar(calendarId, todo);
         const path = `users/${auth.currentUser.uid}/tasks`;
         const docRef = doc(db, path, todo.id);
-        await updateDoc(docRef, {isScheduled: true});
+        await updateDoc(docRef, {isScheduled: true, gCalId: gCalId});
       });
-
-      const setAsScheduled = slottedTodos.map(async (todo) => {
-
-        console.log("set as scheduled");
-      })
-
-
       await Promise.all(sendToCalendarPromises);
     }
     return {slottedTodos, unslottedTodos};
