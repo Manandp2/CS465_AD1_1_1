@@ -60,6 +60,36 @@ const getGoogleCalendarEvents = async (accessToken) => {
 };
 
 
+// Helper function to send a slotted Todo to Google Calendar
+async function sendToGoogleCalendar(todo) {
+  try {
+    const event = {
+      summary: todo.name,
+      start: {
+        dateTime: todo.startTime,
+        // timeZone: 'America/Chicago' // Change as needed
+      },
+      end: {
+        dateTime: todo.endTime,
+        // timeZone: 'America/Chicago' // Change as needed
+      }
+    };
+
+    const request = gapi.client.calendar.events.insert({
+      calendarId: 'primary', // Use the user's primary calendar
+      resource: event
+    });
+
+    await request.execute((event) => {
+      console.log(`Event created: ${event.htmlLink}`);
+    });
+  } catch (error) {
+    console.error("Error sending todo to Google Calendar:", error);
+  }
+}
+
+
+
 export default async function scheduleTodos(unscheduledTodos, accessToken) {
   if (unscheduledTodos.length === 0) {
     return;
@@ -103,8 +133,17 @@ export default async function scheduleTodos(unscheduledTodos, accessToken) {
 
     console.log("sloted", slottedTodos);
     console.log("unslkdjsiojdo", unslottedTodos);
+    // Send slotted todos to Google Calendar after generating time slots
+    if (slottedTodos.length > 0) {
+      const sendToCalendarPromises = slottedTodos.map(async (todo) => {
+        await sendToGoogleCalendar(todo);
+      });
+
+      await Promise.all(sendToCalendarPromises);
+    }
 
     return {slottedTodos, unslottedTodos};
+
   } catch (error) {
     console.error("Error in scheduling todos:", error);
   }
