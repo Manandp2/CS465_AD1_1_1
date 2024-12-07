@@ -101,31 +101,29 @@ function WorkTimesAccordion() {
 
 function BufferTimeAccordion() {
     const [bufferTime, setBufferTime] = React.useState(0);
-    // useEffect(() => {
-    //     getDoc(
-    //         doc(db, "users", auth.currentUser.uid)
-    //       ).then((res) => {
-    //         const data = res.data();
-    //         setBufferTime(data.bufferTime)
-    //       }
-    //     )
-    // }, [])
+    useEffect(() => {
+        getDoc(
+            doc(db, "users", auth.currentUser.uid)
+          ).then((res) => {
+            const data = res.data();
+            setBufferTime(data.bufferTime)
+          }
+        )
+    }, [])
 
     const saveChanges = () => {
-        // Uncomment after firebase implementation
-        
-        // // Save worktime to firebase
-        // const taskDocRef = doc(db, "users", auth.currentUser.uid);
+        // Save worktime to firebase
+        const taskDocRef = doc(db, "users", auth.currentUser.uid);
 
-        // setDoc(taskDocRef, {
-        //     bufferTime: bufferTime
-        // }, {merge:true})
-        // .then(() => {
-        //     console.log("Buffer time updated in Firestore");
-        // })
-        // .catch((error) => {
-        //     console.error("Error updating buffer time: ", error);
-        // });
+        setDoc(taskDocRef, {
+            bufferTime: bufferTime
+        }, {merge:true})
+        .then(() => {
+            console.log("Buffer time updated in Firestore");
+        })
+        .catch((error) => {
+            console.error("Error updating buffer time: ", error);
+        });
     }
 
     return (
