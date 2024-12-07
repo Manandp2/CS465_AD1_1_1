@@ -1,4 +1,4 @@
-import {doc, getDoc, updateDoc, deleteDoc} from "firebase/firestore";
+import {doc, getDoc, updateDoc} from "firebase/firestore";
 import {auth, db} from "./firebase";
 import {gapi} from 'gapi-script';
 
@@ -56,18 +56,8 @@ const getGoogleCalendarEvents = async (accessToken) => {
 };
 
 // Helper function to remove a slotted Todo to Google Calendar
-export async function removeFromGoogleCalendar(eventId, task_id) {
-  let calendarId = "primary"; // Default to primary if not found
-  const userDocRef = doc(db, "users", auth.currentUser.uid);
-  try {
-    // Fetch the user's data from Firestore
-    const userDocSnap = await getDoc(userDocRef);
-    if (userDocSnap.exists()) {
-      const userData = userDocSnap.data();
-      if (userData.calendarId) {
-        calendarId = userData.calendarId; // Use custom calendar ID if exists
-      }
-    }
+export async function removeFromGoogleCalendar(calendarId, eventId) {
+  // let calendarId = "primary"; // Default to primary if not found
 
     // Ensure gapi is initialized
     if (!gapi.client) {
@@ -87,22 +77,13 @@ export async function removeFromGoogleCalendar(eventId, task_id) {
           reject(new Error(`Error deleting event: ${response.error.message}`));
         } else {
           console.log(`Event deleted with Google Calendar ID: ${eventId}`);
-          
-          // Delete user from Firestore, ensuring this operation completes
-          const taskDocRef = doc(db, "users", auth.currentUser.uid, "tasks", task_id);
-          await deleteDoc(taskDocRef);  // Await the Firestore deletion
 
-          console.log(`Task deleted from Firestore: ${task_id}`);
           resolve(response);
         }
       } catch (error) {
-        reject(new Error(`Error during Google Calendar deletion or Firestore deletion: ${error.message}`));
+        // reject(new Error(`Error during Google Calendar deletion or Firestore deletion: ${error.message}`));
       }
     });
-
-  } catch (error) {
-    console.error("Error while removing event from Google Calendar:", error);
-  }
 }
 
 // Helper function to send a slotted Todo to Google Calendar

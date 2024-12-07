@@ -34,6 +34,7 @@ export default function Bottombar({
   unCompleteTasks,
   deleteCompletedTasks,
   completeTasks,
+  calendarId
 }) {
   let selectedList;
   switch (status) {
@@ -47,9 +48,9 @@ export default function Bottombar({
       selectedList = unSchedChecked.concat(schedChecked);
   }
 
-  const deleteToDoFromFirestore = (task_id) => {
+  const deleteToDoFromFirestore = async (task_id) => {
     const taskDocRef = doc(db, "users", auth.currentUser.uid, "tasks", task_id);
-    deleteDoc(taskDocRef);
+    await deleteDoc(taskDocRef);
   };
 
   const handleDelete = () => {
@@ -63,10 +64,15 @@ export default function Bottombar({
         .then((docSnapshot) => {
           const task = docSnapshot.data();
           if (task.isScheduled) {
-            removeFromGoogleCalendar(task.gCalId, task_id)
+            removeFromGoogleCalendar(calendarId, task.gCalId)
+            deleteToDoFromFirestore(task_id).then(() => {
+              getTasks();
+            })
           } else {
             // Delete each list item here
-            deleteToDoFromFirestore(task_id);
+            deleteToDoFromFirestore(task_id).then(() => {
+              getTasks();
+            });
           }
         })
         .catch((error) => {
