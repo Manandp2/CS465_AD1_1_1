@@ -1,7 +1,6 @@
-import {doc, getDoc, updateDoc} from "firebase/firestore";
+import {doc, getDoc, updateDoc, deleteDoc} from "firebase/firestore";
 import {auth, db} from "./firebase";
 import {gapi} from 'gapi-script';
-
 
 const getGoogleCalendarEvents = async (accessToken) => {
   await new Promise((resolve) => gapi.load("client:auth2", resolve));
@@ -56,19 +55,53 @@ const getGoogleCalendarEvents = async (accessToken) => {
   return eventsFromCalendar;
 };
 
-// Helper function to send a slotted Todo to Google Calendar
-async function removeFromGoogleCalendar(calendarId, eventId) {
+// Helper function to remove a slotted Todo to Google Calendar
+export async function removeFromGoogleCalendar(eventId, task_id) {
+  let calendarId = "primary"; // Default to primary if not found
+  const userDocRef = doc(db, "users", auth.currentUser.uid);
   try {
-    const request = gapi.client.calendar.events.delete({
-      calendarId: calendarId, // Use the user's primary calendar
-      eventId: eventId
+    // Fetch the user's data from Firestore
+    const userDocSnap = await getDoc(userDocRef);
+    if (userDocSnap.exists()) {
+      const userData = userDocSnap.data();
+      if (userData.calendarId) {
+        calendarId = userData.calendarId; // Use custom calendar ID if exists
+      }
+    }
+
+    // Ensure gapi is initialized
+    if (!gapi.client) {
+      console.error("Google API client is not initialized.");
+      return;
+    }
+
+    // Use a promise wrapper around gapi.client.calendar.events.delete
+    await new Promise(async (resolve, reject) => {
+      try {
+        const response = await gapi.client.calendar.events.delete({
+          calendarId: calendarId, // Use the correct calendarId
+          eventId: eventId
+        });
+
+        if (response.error) {
+          reject(new Error(`Error deleting event: ${response.error.message}`));
+        } else {
+          console.log(`Event deleted with Google Calendar ID: ${eventId}`);
+          
+          // Delete user from Firestore, ensuring this operation completes
+          const taskDocRef = doc(db, "users", auth.currentUser.uid, "tasks", task_id);
+          await deleteDoc(taskDocRef);  // Await the Firestore deletion
+
+          console.log(`Task deleted from Firestore: ${task_id}`);
+          resolve(response);
+        }
+      } catch (error) {
+        reject(new Error(`Error during Google Calendar deletion or Firestore deletion: ${error.message}`));
+      }
     });
 
-    await request.execute((event) => {
-      console.log(`Event deleted with Google Calendar ID: `, eventId);
-    });
   } catch (error) {
-    console.error("Error deleting todo in Google Calendar:", error);
+    console.error("Error while removing event from Google Calendar:", error);
   }
 }
 
@@ -106,6 +139,8 @@ async function sendToGoogleCalendar(calendarId, todo) {
     console.error("Error sending todo to Google Calendar:", error);
   }
 }
+
+
 
 export default async function scheduleTodos(unscheduledTodos, accessToken) {
   if (unscheduledTodos.length === 0) {
