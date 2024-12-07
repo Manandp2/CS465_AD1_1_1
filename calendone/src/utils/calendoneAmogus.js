@@ -77,7 +77,8 @@ async function sendToGoogleCalendar(calendarId, todo) {
     });
 
     await request.execute((event) => {
-      console.log(`Event created: ${event.htmlLink}`);
+
+      console.log(`Event created with Google Calendar ID: ${event.id}`);
     });
   } catch (error) {
     console.error("Error sending todo to Google Calendar:", error);
