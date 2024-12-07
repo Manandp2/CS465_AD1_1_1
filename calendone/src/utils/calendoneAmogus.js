@@ -122,7 +122,7 @@ export default async function scheduleTodos(unscheduledTodos, accessToken) {
       const occupiedMinutes = new Array(1440).fill(false);
       const eventsForDay = filterEventsByDate(events, date);
       console.log("events for day: ", eventsForDay);
-      await markOccupiedTimeSlots(occupiedMinutes, eventsForDay);
+      await markOccupiedTimeSlots(occupiedMinutes, eventsForDay, date);
 
       const availableSlots = createAvailableTimeSlots(occupiedMinutes);
       const {slotted, unslotted} = scheduleForDay(unslottedTodos, availableSlots, date);
@@ -202,7 +202,15 @@ function sortByDeadlineAndDuration(todos) {
 
 
 // Mark array indices as occupied by existing events
-async function markOccupiedTimeSlots(occupiedMinutes, googleCalendarEvents) {
+async function markOccupiedTimeSlots(occupiedMinutes, googleCalendarEvents, date) {
+  const currentDate = new Date();
+  if (date.getDay() === currentDate.getDay()) {
+    const currentTime = getMinuteOfDay(currentDate);
+    for (let i = 0; i < currentTime; i++) {
+      occupiedMinutes[i] = true;
+    }
+  }
+
   googleCalendarEvents.forEach(event => {
     const startMinute = getMinuteOfDay(event.start);
     const endMinute = getMinuteOfDay(event.end);
