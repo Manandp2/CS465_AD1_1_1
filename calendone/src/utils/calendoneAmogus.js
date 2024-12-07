@@ -68,12 +68,12 @@ async function sendToGoogleCalendar(calendarId, todo) {
       end: {
         dateTime: todo.endTime,
         // timeZone: 'America/Chicago' // Change as needed
-      },
+      }
     };
 
     const request = gapi.client.calendar.events.insert({
       calendarId: calendarId, // Use the user's primary calendar
-      resource: event,
+      resource: event
     });
 
     await request.execute((event) => {
@@ -138,7 +138,7 @@ export default async function scheduleTodos(unscheduledTodos, accessToken) {
       await markOccupiedTimeSlots(occupiedMinutes, eventsForDay, date, bufferTime);
 
       const availableSlots = createAvailableTimeSlots(occupiedMinutes);
-      const { slotted, unslotted } = scheduleForDay(unslottedTodos, availableSlots, date);
+      const { slotted, unslotted } = scheduleForDay(unslottedTodos, availableSlots, date, bufferTime);
 
       slottedTodos.push(...slotted);
       unslottedTodos = unslotted;
