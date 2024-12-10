@@ -15,6 +15,8 @@ import { collection, doc, getDoc, getDocs, writeBatch } from "firebase/firestore
 import RecapDialog from "../components/RecapDialog";
 import { gapi } from "gapi-script";
 import scheduleTodos from "../utils/calendoneAmogus";
+import { removeFromGoogleCalendar } from "../utils/calendoneAmogus";
+
 
 export default function Home({ setPage }) {
   const [unscheduledTasks, setUnscheduledTasks] = useState([]);
@@ -49,6 +51,26 @@ export default function Home({ setPage }) {
     setNewCompletedExist(ahdoahdo);
     // return eventEnds; // Return the array of event ends if needed
   };
+
+  const handleUnschedule = () => {
+    // deleteToDoFromFirestore("OVDCAnvF3Re5LaCsbH1w")
+    // Delete each listItem through firestore
+    const promises = schedChecked.map(async (task_id) => {
+      // Get each task
+      const tasksCollectionPath = `users/${auth.currentUser.uid}/tasks`;
+      const taskDocRef = doc(db, tasksCollectionPath, task_id)
+      getDoc(taskDocRef)
+      .then((docSnapshot) => {
+        const task = docSnapshot.data();
+        removeFromGoogleCalendar(calendarId, task.gCalId)
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+    });
+    Promise.all(promises).then(() => unscheduleTasksFromFirestore());
+  }
+
   const unscheduleTasksFromFirestore = () => {
     const batch = writeBatch(db); // Create a new batch instance
     const tasksCollectionPath = `users/${auth.currentUser.uid}/tasks`;
@@ -313,7 +335,7 @@ export default function Home({ setPage }) {
             getTasks().then(() => setUnschedChecked([]))
           });
         }}
-        unscheduleTasks={unscheduleTasksFromFirestore}
+        unscheduleTasks={handleUnschedule}
         unSchedChecked={unschedChecked}
         setUnschedChecked={setUnschedChecked}
         schedChecked={schedChecked}
