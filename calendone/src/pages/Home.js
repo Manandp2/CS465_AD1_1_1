@@ -309,7 +309,9 @@ export default function Home({ setPage }) {
         setPage={setPage}
         getTasks={getTasks}
         scheduleTasks={() => {
-          scheduleTodos(unschedChecked, accessToken).then(() => getTasks());
+          scheduleTodos(unschedChecked, accessToken).then(() => {
+            getTasks().then(() => setUnschedChecked([]))
+          });
         }}
         unscheduleTasks={unscheduleTasksFromFirestore}
         unSchedChecked={unschedChecked}
